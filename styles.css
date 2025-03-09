@@ -34,11 +34,13 @@ body {
 }
 
 .badge {
-    padding: 0.25rem 0.75rem;
+    padding: 0.25rem .75rem;
     border-radius: 9999px;
     background-color: #e5e7eb;
     font-size: 0.875rem;
     cursor: pointer;
+    display: inline-block;
+    white-space: nowrap;
 }
 
 .filters {
