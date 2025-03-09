@@ -1,0 +1,357 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body {
+    padding: 1rem;
+    background-color: #f5f5f5;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.card {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.card-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    background-color: #e5e7eb;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.filters {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.search-container {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+}
+
+input, select {
+    width: 100%;
+    padding: 0.5rem 2rem 0.5rem 2rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    background-color: white;
+    margin-bottom: 3px;
+}
+
+.term-container {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background-color: white;
+    flex: 1;
+    margin: 0.5rem;
+    min-width: 200px;
+    overflow: hidden;
+}
+
+.term-header {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.course-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    cursor: move;
+    transition: box-shadow 0.2s;
+}
+
+.course-card.in-progress {
+    background-color: #fef9c3; /* Yellow for in-progress */
+}
+
+.course-card.completed {
+    background-color: #dcfce7; /* Green for completed */
+}
+
+.course-card.failed {
+    background-color: #fee2e2; /* Red for failed */
+}
+
+.course-card.requirement-not-met {
+    background-color: #ffedd5; /* Orange for requirement not met */
+}
+
+.course-card:hover {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.course-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.course-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+button {
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid #e5e7eb;
+    background-color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #f3f4f6;
+}
+
+.grade-input {
+    width: 5rem;
+    padding: 0.375rem;
+    border-radius: 0.375rem;
+    border: 1px solid #e5e7eb;
+}
+
+.grid {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.gpa-container {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+#gpaChart {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+#gpaLineChart {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.year-section {
+    margin-bottom: 2rem;
+}
+
+.year-section h3 {
+    margin-bottom: 1rem;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.required-courses {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+}
+
+.required-courses h3 {
+    margin-bottom: 1rem;
+}
+
+.required-course {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    background-color: #f9fafb;
+}
+
+.required-course.completed {
+    background-color: #dcfce7; /* Light green background */
+}
+
+.required-course.failed {
+    background-color: #fee2e2; /* Light red background */
+}
+
+.credit-breakdown {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+}
+
+.credit-breakdown h3 {
+    margin-bottom: 1rem;
+}
+
+.credit-breakdown table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.credit-breakdown th, .credit-breakdown td {
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    text-align: left;
+}
+
+.credit-breakdown th {
+    background-color: #f9fafb;
+}
+
+.add-term-button, .add-course-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    background-color: #f3f4f6;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.add-term-button:hover, .add-course-button:hover {
+    background-color: #e5e7eb;
+}
+
+.add-year-button {
+    margin-bottom: 1rem;
+}
+
+.course-dropdown {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    border: 1px solid #e5e7eb;
+    background-color: white;
+    margin-bottom: 1rem;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    max-width: 500px;
+    width: 100%;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.modal-header h3 {
+    margin: 0;
+}
+
+.modal-header .close {
+    cursor: pointer;
+    font-size: 1.5rem;
+}
+
+.color-legend {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+}
+
+.color-legend h3 {
+    margin-bottom: 1rem;
+}
+
+.color-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.color-legend-item div {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.25rem;
+}
+
+.color-legend-item.in-progress div {
+    background-color: #fef9c3; /* Yellow for in-progress */
+}
+
+.color-legend-item.completed div {
+    background-color: #dcfce7; /* Green for completed */
+}
+
+.color-legend-item.failed div {
+    background-color: #fee2e2; /* Red for failed */
+}
+
+.color-legend-item.requirement-not-met div {
+    background-color: #ffedd5; /* Orange for requirement not met */
+}

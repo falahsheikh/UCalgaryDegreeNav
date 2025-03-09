@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University of Calgary Degree Navigator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <span class="material-symbols-outlined">school</span>
+                University of Calgary Degree Navigator
+                <span class="badge" id="credit-counter" onclick="showCreditBreakdown()">0/120 Credits</span>
+                <span class="badge" id="d-plus-counter">0/<span id="max-d-plus">2</span> D+ Grades</span>
+            </div>
+        </div>
+        <div class="card-content" style="padding: 1.5rem;">
+            <!-- Major Selection -->
+            <div style="margin-bottom: 1.5rem;">
+                <label for="major-select">Select Major:</label>
+                <select id="major-select" onchange="updateMajor()">
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Mathematics">Mathematics</option>
+                    <option value="Physics">Physics</option>
+                </select>
+            </div>
+
+            <div class="filters">
+                <div class="search-container">
+                    <span class="material-symbols-outlined search-icon">search</span>
+                    <input type="text" id="search" placeholder="Search courses...">
+                </div>
+                <select id="year-filter">
+                    <option value="all">All Years</option>
+                    <option value="1">Year 1</option>
+                    <option value="2">Year 2</option>
+                    <option value="3">Year 3</option>
+                    <option value="4">Year 4</option>
+                </select>
+                <select id="term-filter">
+                    <option value="all">All Terms</option>
+                    <option>Fall</option>
+                    <option>Winter</option>
+                    <option>Spring</option>
+                    <option>Summer</option>
+                </select>
+                <select id="status-filter">
+                    <option value="all">All Courses</option>
+                    <option value="completed">Completed</option>
+                    <option value="incomplete">Incomplete</option>
+                </select>
+            </div>
+
+            <!-- Year Sections -->
+            <div id="year-sections"></div>
+
+            <!-- Add Year Button -->
+            <div class="add-year-button" id="add-year-button">
+                <button onclick="addYear()">Add Year</button>
+            </div>
+
+            <!-- GPA Charts/Graphs -->
+            <div class="gpa-container">
+                <div>
+                    <h3>GPA Breakdown</h3>
+                    <canvas id="gpaChart"></canvas>
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <strong>Current GPA:</strong> <span id="current-gpa">0.00</span>
+                    </div>
+                </div>
+                <div>
+                    <h3>GPA Trend</h3>
+                    <canvas id="gpaLineChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Required Courses Section Box -->
+            <div class="required-courses">
+                <h3>Required Courses</h3>
+                <div id="required-courses-list"></div>
+            </div>
+
+            <!-- Credit Breakdown Modal -->
+            <div class="modal" id="credit-breakdown-modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Credit Breakdown</h3>
+                        <span class="close" onclick="closeCreditBreakdownModal()">&times;</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Level</th>
+                                <th id="major-credits-header">CPSC Credits</th>
+                                <th>Other Credits</th>
+                                <th>Total Credits</th>
+                            </tr>
+                        </thead>
+                        <tbody id="credit-breakdown-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Color Legend -->
+            <div class="color-legend">
+                <h3>Color Legend</h3>
+                <div class="color-legend-item in-progress">
+                    <div></div>
+                    <span>In Progress</span>
+                </div>
+                <div class="color-legend-item completed">
+                    <div></div>
+                    <span>Completed</span>
+                </div>
+                <div class="color-legend-item failed">
+                    <div></div>
+                    <span>Failed</span>
+                </div>
+                <div class="color-legend-item requirement-not-met">
+                    <div></div>
+                    <span>Requirement Not Met</span>
+                </div>
+            </div>
+
+            <!-- Set D+ Limit -->
+            <div style="margin-top: 1rem; text-align: right;">
+                <label for="d-plus-limit">Set Maximum D+ Grades Allowed:</label>
+                <input type="number" id="d-plus-limit" min="0" value="2" style="width: 4rem; padding: 0.5rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px;">
+                <button onclick="setDPlusLimit()">Set Limit</button>
+            </div>
+
+            <!-- Generate Sharable Link (saves state) -->
+            <div style="margin-top: 2rem;">
+                <button onclick="generateSharableLink()">Generate Sharable Link</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
