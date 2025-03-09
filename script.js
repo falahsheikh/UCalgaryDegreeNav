@@ -295,7 +295,36 @@ function updateDPlusCounter() {
 
 function updateCreditCounter() {
     const total = courses.reduce((sum, course) => course.completed ? sum + course.credits : sum, 0);
-    document.getElementById('credit-counter').textContent = `${total}/120 Credits`;
+    const creditCounter = document.getElementById('credit-counter');
+    
+    // Set the text
+    creditCounter.textContent = `${total}/120 Credits`;
+    
+    // Apply old-school button styling
+    creditCounter.style.cursor = 'pointer';
+    creditCounter.style.borderWidth = '2px';
+    creditCounter.style.borderStyle = 'solid';
+    creditCounter.style.borderColor = '#ffffff #808080 #808080 #ffffff';
+    creditCounter.style.backgroundColor = '#d4d0c8'; // Classic Windows gray
+    
+    // Add hover and active states
+    creditCounter.onmouseover = function() {
+        this.style.backgroundColor = '#d8d4cc';
+    };
+    
+    creditCounter.onmouseout = function() {
+        this.style.backgroundColor = '#d4d0c8';
+    };
+    
+    creditCounter.onmousedown = function() {
+        this.style.borderColor = '#808080 #ffffff #ffffff #808080';
+        this.style.padding = '5px 11px 3px 13px'; // Shift content slightly
+    };
+    
+    creditCounter.onmouseup = function() {
+        this.style.borderColor = '#ffffff #808080 #808080 #ffffff';
+        this.style.padding = '4px 12px 4px 12px'; // Reset padding
+    };
 }
 
 function showCreditBreakdown() {
