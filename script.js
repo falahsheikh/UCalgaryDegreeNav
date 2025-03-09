@@ -217,6 +217,13 @@ function toggleCompletion(id) {
     courses = courses.map(course => 
         course.id === id ? { ...course, completed: !course.completed } : course
     );
+    
+    // Update required courses if the toggled course is a required one
+    const major = document.getElementById('major-select').value;
+    if (MAJOR_REQUIREMENTS[major].includes(id)) {
+        renderRequiredCourses();
+    }
+    
     renderCourses();
 }
 
@@ -225,6 +232,7 @@ function updateGrade(id, grade) {
         alert(`You have already used the maximum allowed D+ grades (${maxDPlusAllowed}).`);
         return;
     }
+    
     courses = courses.map(course => 
         course.id === id ? { ...course, grade } : course
     );
@@ -236,6 +244,12 @@ function updateGrade(id, grade) {
         );
     }
 
+    // Update required courses if the grade-updated course is a required one
+    const major = document.getElementById('major-select').value;
+    if (MAJOR_REQUIREMENTS[major].includes(id)) {
+        renderRequiredCourses();
+    }
+    
     renderCourses();
 }
 
@@ -557,14 +571,34 @@ function renderRequiredCourses() {
     const requiredCoursesList = document.getElementById('required-courses-list');
     requiredCoursesList.innerHTML = '';
 
-    requiredCourses.forEach((course, index) => {
-        const courseDiv = document.createElement('div');
-        courseDiv.className = `required-course${course.completed ? ' completed' : ''}${course.grade && !PASSING_GRADES.includes(course.grade) ? ' failed' : ''}`;
-        courseDiv.innerHTML = `
-            <span>${course.id} - ${course.name}</span>
-            ${course.grade ? `<span>Grade: ${course.grade}</span>` : ''}
-        `;
-        requiredCoursesList.appendChild(courseDiv);
+    const major = document.getElementById('major-select').value;
+    const requiredCourseIds = MAJOR_REQUIREMENTS[major];
+    
+    requiredCourseIds.forEach(courseId => {
+        const course = courses.find(c => c.id === courseId);
+        
+        // If the course exists in the courses array
+        if (course) {
+            const courseDiv = document.createElement('div');
+            courseDiv.className = `required-course${course.completed ? ' completed' : ''}${course.grade && !PASSING_GRADES.includes(course.grade) ? ' failed' : ''}`;
+            courseDiv.innerHTML = `
+                <span>${course.id} - ${course.name}</span>
+                ${course.grade ? `<span>Grade: ${course.grade}</span>` : ''}
+            `;
+            requiredCoursesList.appendChild(courseDiv);
+        } else {
+            // If the course is required but not added yet
+            const availableCourse = AVAILABLE_COURSES[major].find(c => c.id === courseId);
+            if (availableCourse) {
+                const courseDiv = document.createElement('div');
+                courseDiv.className = 'required-course not-added';
+                courseDiv.innerHTML = `
+                    <span>${availableCourse.id} - ${availableCourse.name}</span>
+                    <span class="not-added-label">Not Added</span>
+                `;
+                requiredCoursesList.appendChild(courseDiv);
+            }
+        }
     });
 }
 
