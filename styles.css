@@ -413,7 +413,6 @@ button:hover {
     }
 }
 
-/* Make sure canvas elements maintain proper sizing */
 canvas {
     max-width: 100%;
     height: 100% !important;

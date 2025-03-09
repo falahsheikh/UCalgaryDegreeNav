@@ -686,7 +686,7 @@ function generateSharableLink() {
     // Show the link to the user
     const copied = prompt("Share this link to save your progress (press Ctrl+C to copy):", link);
     
-    // Optional: Show a notification that the link was generated successfully
+    // Show a notification that the link was generated successfully
     showNotification("Sharable link generated successfully!");
 }
 
