@@ -50,6 +50,33 @@ function initializeCoursesForMajor(major) {
         required: MAJOR_REQUIREMENTS[major].includes(course.id)
     }));
     requiredCourses = courses.filter(course => course.required);
+    
+    // Ensure the year filter dropdown has options for years 1-4
+    updateYearFilterOptions();
+}
+function updateYearFilterOptions() {
+    const yearFilter = document.getElementById('year-filter');
+    // Clear existing options except the "All Years" option
+    while (yearFilter.options.length > 1) {
+        yearFilter.remove(1);
+    }
+    
+    // Add options for years 1-4
+    for (let i = 1; i <= 4; i++) {
+        const yearOption = document.createElement('option');
+        yearOption.value = i;
+        yearOption.textContent = `Year ${i}`;
+        yearFilter.appendChild(yearOption);
+    }
+    
+    // Add options for any years beyond 4 that exist in the courses
+    const existingYears = [...new Set(courses.map(course => course.year))];
+    existingYears.filter(year => year > 4).forEach(year => {
+        const yearOption = document.createElement('option');
+        yearOption.value = year;
+        yearOption.textContent = `Year ${year}`;
+        yearFilter.appendChild(yearOption);
+    });
 }
 
 function renderCourses() {
@@ -74,44 +101,48 @@ function renderCourses() {
     yearSections.innerHTML = '';
 
     if (selectedYear === 'all') {
-        // Group courses by year
-        const years = [...new Set(courses.map(course => course.year))].sort();
-        years.forEach(year => {
+        // Find all years that exist in the data, or should exist by default
+        const defaultYears = [1, 2, 3, 4];
+        const courseYears = [...new Set(courses.map(course => course.year))];
+        const additionalYears = courseYears.filter(year => !defaultYears.includes(year) && year > 4).sort((a, b) => a - b);
+        const allYears = [...defaultYears, ...additionalYears];
+        
+        allYears.forEach(year => {
             const yearCourses = filtered.filter(course => course.year === year);
-            if (yearCourses.length > 0) { // Only show years with at least one course
-                const yearSection = document.createElement('div');
-                yearSection.className = 'year-section';
-                yearSection.innerHTML = `
-                    <h3>Year ${year}</h3>
+            
+            // Create section for all years (1-4 by default and any added years)
+            const yearSection = document.createElement('div');
+            yearSection.className = 'year-section';
+            yearSection.innerHTML = `
+                <h3>Year ${year}</h3>
+            `;
+            const termGrid = document.createElement('div');
+            termGrid.className = 'grid';
+            ['Fall', 'Winter', 'Spring', 'Summer'].forEach(term => {
+                const termContainer = document.createElement('div');
+                termContainer.className = 'term-container';
+                termContainer.dataset.term = term;
+                termContainer.dataset.year = year;
+                termContainer.ondrop = handleDrop;
+                termContainer.ondragover = allowDrop;
+                termContainer.innerHTML = `
+                    <div class="term-header">
+                        <span>${term} Term</span>
+                        ${canAddCourse(year, term) ? `
+                            <div class="add-course-button" onclick="addCourseToTerm(${year}, '${term}')">
+                                <span class="material-symbols-outlined">add</span>
+                            </div>
+                        ` : ''}
+                    </div>
                 `;
-                const termGrid = document.createElement('div');
-                termGrid.className = 'grid';
-                ['Fall', 'Winter', 'Spring', 'Summer'].forEach(term => {
-                    const termContainer = document.createElement('div');
-                    termContainer.className = 'term-container';
-                    termContainer.dataset.term = term;
-                    termContainer.dataset.year = year;
-                    termContainer.ondrop = handleDrop;
-                    termContainer.ondragover = allowDrop;
-                    termContainer.innerHTML = `
-                        <div class="term-header">
-                            <span>${term} Term</span>
-                            ${canAddCourse(year, term) ? `
-                                <div class="add-course-button" onclick="addCourseToTerm(${year}, '${term}')">
-                                    <span class="material-symbols-outlined">add</span>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-                    const termCourses = yearCourses.filter(course => course.term === term);
-                    termCourses.forEach(course => {
-                        termContainer.appendChild(createCourseCard(course));
-                    });
-                    termGrid.appendChild(termContainer);
+                const termCourses = yearCourses.filter(course => course.term === term);
+                termCourses.forEach(course => {
+                    termContainer.appendChild(createCourseCard(course));
                 });
-                yearSection.appendChild(termGrid);
-                yearSections.appendChild(yearSection);
-            }
+                termGrid.appendChild(termContainer);
+            });
+            yearSection.appendChild(termGrid);
+            yearSections.appendChild(yearSection);
         });
     } else {
         // Display courses for the selected year
@@ -149,7 +180,7 @@ function renderCourses() {
         yearSections.appendChild(yearSection);
     }
 
-    // Hide the "Add Year" button if not in "All Years" view
+    // Show the "Add Year" button only if we're in "All Years" view
     const addYearButton = document.getElementById('add-year-button');
     addYearButton.style.display = selectedYear === 'all' ? 'block' : 'none';
 
@@ -395,15 +426,20 @@ function canAddCourse(year, term) {
     );
     return availableCourses.length > 0;
 }
-
 function addYear() {
     const years = [...new Set(courses.map(course => course.year))];
-    const maxYear = years.length > 0 ? Math.max(...years) : 0;
+    const maxYear = years.length > 0 ? Math.max(...years) : 4; // Default to 4 if no courses
     const newYear = maxYear + 1;
+    
+    // Make sure we can't add years less than 5
+    if (newYear < 5) {
+        alert("Years 1-4 are already available by default.");
+        return;
+    }
 
     // Check if the previous year has at least one course
     const previousYearCourses = courses.filter(course => course.year === maxYear);
-    if (maxYear > 0 && previousYearCourses.length === 0) {
+    if (previousYearCourses.length === 0) {
         alert(`Cannot add Year ${newYear} because Year ${maxYear} is empty. Please add at least one course to Year ${maxYear} first.`);
         return;
     }
@@ -414,7 +450,7 @@ function addYear() {
         return;
     }
 
-    // Add a default course for the Fall term of the new year
+    // Check for available courses
     const major = document.getElementById('major-select').value;
     const availableCourses = AVAILABLE_COURSES[major].filter(course => 
         !courses.some(c => c.id === course.id)
@@ -431,6 +467,9 @@ function addYear() {
     newYearOption.value = newYear;
     newYearOption.textContent = `Year ${newYear}`;
     yearFilter.appendChild(newYearOption);
+    
+    // Set the filter to "All Years" to show all years including the new one
+    yearFilter.value = 'all';
     
     // Render the courses to show the new year
     renderCourses();
@@ -583,6 +622,10 @@ function loadFromSharableLink() {
         maxDPlusAllowed = decodedData.maxDPlusAllowed;
         requiredCourses = decodedData.requiredCourses || [];
         document.getElementById('max-d-plus').textContent = maxDPlusAllowed;
+        
+        // Update year filter options to include all years from loaded data
+        updateYearFilterOptions();
+        
         renderCourses();
     }
 }
@@ -643,6 +686,21 @@ function renderRequiredCourses() {
             }
         }
     });
+}
+
+// The initialization code should include a call to ensure years 1-4 exist
+function initialize() {
+    // Initialize courses for the default major (Computer Science)
+    initializeCoursesForMajor('Computer Science');
+    
+    // Update year filter options
+    updateYearFilterOptions();
+    
+    // Render courses to show years 1-4
+    renderCourses();
+    
+    // Try to load from sharable link if available
+    loadFromSharableLink();
 }
 
 // Event listeners
