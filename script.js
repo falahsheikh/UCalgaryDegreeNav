@@ -54,6 +54,7 @@ function initializeCoursesForMajor(major) {
     // Ensure the year filter dropdown has options for years 1-4
     updateYearFilterOptions();
 }
+
 function updateYearFilterOptions() {
     const yearFilter = document.getElementById('year-filter');
     // Clear existing options except the "All Years" option
@@ -659,7 +660,6 @@ function updateRequiredCourses() {
     requiredCourses = courses.filter(course => MAJOR_REQUIREMENTS[major].includes(course.id));
 }
 
-
 function setDPlusLimit() {
     const limit = parseInt(document.getElementById('d-plus-limit').value);
     if (isNaN(limit) || limit < 0) {
@@ -673,38 +673,155 @@ function setDPlusLimit() {
 
 function generateSharableLink() {
     const data = {
-        courses,
+        courses: JSON.parse(JSON.stringify(courses)), // Deep copy to avoid reference issues
         maxDPlusAllowed,
-        requiredCourses
+        requiredCourses: JSON.parse(JSON.stringify(requiredCourses || [])), // Deep copy
+        major: document.getElementById('major-select')?.value || 'Computer Science'
     };
+
+    // Encode the data to base64
     const encodedData = btoa(JSON.stringify(data));
+
+    // Generate the sharable link
     const link = `${window.location.origin}${window.location.pathname}?data=${encodedData}`;
-    
-    // Set the flag indicating a link has been generated
+
+    // Save the current state to detect unsaved changes later
     window.linkGenerated = true;
-    
-    // Show the link to the user
-    const copied = prompt("Share this link to save your progress (press Ctrl+C to copy):", link);
-    
-    // Show a notification that the link was generated successfully
-    showNotification("Sharable link generated successfully!");
+    window.lastSavedState = JSON.stringify(data);
+
+    // Prompt the user with the sharable link
+    prompt("Share this link to save your progress:", link);
 }
 
 function loadFromSharableLink() {
     const urlParams = new URLSearchParams(window.location.search);
     const data = urlParams.get('data');
+
     if (data) {
-        const decodedData = JSON.parse(atob(data));
-        courses = decodedData.courses;
-        maxDPlusAllowed = decodedData.maxDPlusAllowed;
-        requiredCourses = decodedData.requiredCourses || [];
-        document.getElementById('max-d-plus').textContent = maxDPlusAllowed;
-        
-        // Update year filter options to include all years from loaded data
-        updateYearFilterOptions();
-        
-        renderCourses();
+        try {
+            // Decode the data from base64
+            const decodedData = JSON.parse(atob(data));
+
+            // Validate the decoded data
+            if (!decodedData || typeof decodedData !== 'object') {
+                console.warn("Invalid data format in the link. Loading default state.");
+                return false;
+            }
+
+            if (!decodedData.courses || !Array.isArray(decodedData.courses)) {
+                console.warn("Invalid or missing 'courses' data in the link. Loading default state.");
+                return false;
+            }
+
+            if (typeof decodedData.maxDPlusAllowed !== 'number') {
+                console.warn("Invalid or missing 'maxDPlusAllowed' in the link. Loading default state.");
+                return false;
+            }
+
+            if (!decodedData.requiredCourses || !Array.isArray(decodedData.requiredCourses)) {
+                console.warn("Invalid or missing 'requiredCourses' data in the link. Loading default state.");
+                return false;
+            }
+
+            if (!decodedData.major || typeof decodedData.major !== 'string') {
+                console.warn("Invalid or missing 'major' data in the link. Loading default state.");
+                return false;
+            }
+
+            // Apply the loaded data to the application state
+            courses = decodedData.courses;
+            maxDPlusAllowed = decodedData.maxDPlusAllowed;
+            requiredCourses = decodedData.requiredCourses;
+
+            // Update the major if it exists in the data
+            const majorSelect = document.getElementById('major-select');
+            if (majorSelect && decodedData.major) {
+                majorSelect.value = decodedData.major;
+            }
+
+            // Update the D+ limit display
+            const maxDPlusElement = document.getElementById('max-d-plus');
+            if (maxDPlusElement) {
+                maxDPlusElement.textContent = maxDPlusAllowed;
+            }
+
+            // Update the UI
+            renderCourses();
+            renderRequiredCourses();
+            updateAllGraphs();
+
+            // Save the current state to detect unsaved changes later
+            window.linkGenerated = true;
+            window.lastSavedState = JSON.stringify(decodedData);
+
+            console.log("Successfully loaded data from link:", courses.length, "courses");
+
+            // Show a success notification to the user
+            showNotification("Course data loaded successfully!");
+            return true;
+        } catch (error) {
+            console.warn("Failed to load from sharable link:", error);
+            return false;
+        }
     }
+    return false;
+}
+
+// Ensure the loadFromSharableLink function is called AFTER the DOM is fully loaded
+window.addEventListener('load', () => {
+    loadFromSharableLink();
+});
+
+function hasUnsavedChanges() {
+    if (!window.linkGenerated) {
+        return courses.length > 0; // If we have courses but never generated a link
+    }
+
+    // Get current state to compare with last saved state
+    const currentData = {
+        courses: courses,
+        maxDPlusAllowed: maxDPlusAllowed,
+        requiredCourses: requiredCourses,
+        major: document.getElementById('major-select')?.value || 'Computer Science',
+    };
+
+    // Compare as JSON strings to detect any differences
+    return window.lastSavedState !== JSON.stringify(currentData);
+}
+
+function trackChanges() {
+    // This function is called whenever there's a change to the course data
+    
+    // We need to check if we've ever generated a link first
+    if (window.linkGenerated) {
+        const currentData = {
+            courses: courses,
+            maxDPlusAllowed: maxDPlusAllowed,
+            requiredCourses: requiredCourses,
+            major: document.getElementById('major-select')?.value || 'Computer Science',
+        };
+        
+        // Check if there are unsaved changes
+        const hasChanges = window.lastSavedState !== JSON.stringify(currentData);
+        
+        // Update UI to show unsaved changes indicator
+        const saveReminder = document.getElementById('save-reminder');
+        if (saveReminder) {
+            if (hasChanges) {
+                saveReminder.classList.remove('hidden');
+            } else {
+                saveReminder.classList.add('hidden');
+            }
+        }
+    }
+}
+
+// This function should be called after any course-related operation
+function updateAppState() {
+    renderCourses();
+    renderRequiredCourses();
+    updateAllGraphs();
+    trackChanges(); // Check for unsaved changes
 }
 
 function allowDrop(e) {
@@ -718,7 +835,7 @@ function handleDrop(e) {
     courses = courses.map(course => 
         course.id === draggedCourseId ? { ...course, term, year: parseInt(year) } : course
     );
-    renderCourses();
+    updateAppState(); // Use the new combined function
     draggedCourseId = null;
 }
 
@@ -761,8 +878,7 @@ function updateMajor() {
     const major = document.getElementById('major-select').value;
     initializeCoursesForMajor(major);
     requiredCourses = courses.filter(course => MAJOR_REQUIREMENTS[major].includes(course.id));
-    renderRequiredCourses();
-    renderCourses();
+    updateAppState(); // Use the new combined function
 }
 
 function hasGeneratedLink() {
@@ -805,19 +921,26 @@ function renderRequiredCourses() {
     });
 }
 
-// The initialization code should include a call to ensure years 1-4 exist
 function initialize() {
+    // Set default values
+    window.linkGenerated = false;
+    window.lastSavedState = null;
+    
     // Initialize courses for the default major (Computer Science)
     initializeCoursesForMajor('Computer Science');
     
     // Update year filter options
     updateYearFilterOptions();
     
-    // Render courses to show years 1-4
-    renderCourses();
-    
     // Try to load from sharable link if available
-    loadFromSharableLink();
+    const loadedFromLink = loadFromSharableLink();
+    
+    // Only render courses if not loaded from link (to avoid duplicating the render)
+    if (!loadedFromLink) {
+        renderCourses();
+        renderRequiredCourses();
+        updateAllGraphs();
+    }
 }
 
 function updateAllGraphs() {
@@ -905,105 +1028,6 @@ function updateRequirementProgressChart() {
         window.requirementChart.options.plugins.centerText = true;
         window.requirementChart.register(centerText);
     }
-}
-
-function updateCourseDistributionChart() {
-    const ctx = document.getElementById('courseDistributionChart').getContext('2d');
-    
-    // Calculate course distribution by year and term
-    const distribution = {
-        'Year 1': { Fall: 0, Winter: 0, Spring: 0, Summer: 0 },
-        'Year 2': { Fall: 0, Winter: 0, Spring: 0, Summer: 0 },
-        'Year 3': { Fall: 0, Winter: 0, Spring: 0, Summer: 0 },
-        'Year 4': { Fall: 0, Winter: 0, Spring: 0, Summer: 0 }
-    };
-    
-    // Add extra years if they exist
-    const years = [...new Set(courses.map(course => course.year))];
-    years.forEach(year => {
-        if (year > 4) {
-            distribution[`Year ${year}`] = { Fall: 0, Winter: 0, Spring: 0, Summer: 0 };
-        }
-    });
-    
-    // Count courses by year and term
-    courses.forEach(course => {
-        const yearKey = `Year ${course.year}`;
-        if (distribution[yearKey]) {
-            distribution[yearKey][course.term]++;
-        }
-    });
-    
-    // Calculate credit load for each term
-    const creditLoad = {};
-    Object.keys(distribution).forEach(year => {
-        creditLoad[year] = {};
-        Object.keys(distribution[year]).forEach(term => {
-            const termCourses = courses.filter(course => 
-                `Year ${course.year}` === year && course.term === term
-            );
-            creditLoad[year][term] = termCourses.reduce((sum, course) => sum + course.credits, 0);
-        });
-    });
-    
-    // Create datasets for the chart
-    const labels = Object.keys(distribution);
-    const datasets = ['Fall', 'Winter', 'Spring', 'Summer'].map((term, index) => {
-        const colors = ['#2196F3', '#4CAF50', '#FFC107', '#F44336'];
-        return {
-            label: term,
-            data: labels.map(year => creditLoad[year][term]),
-            backgroundColor: colors[index]
-        };
-    });
-    
-    // Create or update the chart
-    if (window.distributionChart) {
-        window.distributionChart.destroy();
-    }
-    
-    window.distributionChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: datasets
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Credit Distribution by Term',
-                    font: { size: 14 }
-                },
-                legend: { position: 'bottom' },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const yearIndex = context.dataIndex;
-                            const term = context.dataset.label;
-                            const year = labels[yearIndex];
-                            const credits = context.raw;
-                            const courseCount = distribution[year][term];
-                            return `${term}: ${credits} credits (${courseCount} courses)`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: { stacked: true },
-                y: { 
-                    stacked: true,
-                    title: {
-                        display: true,
-                        text: 'Credits'
-                    },
-                    beginAtZero: true
-                }
-            }
-        }
-    });
 }
 
 function updateCourseDistributionChart() {
