@@ -65,17 +65,24 @@
             </div>
 
             <!-- GPA Charts/Graphs -->
-            <div class="gpa-container">
-                <div>
-                    <h3>GPA Breakdown</h3>
-                    <canvas id="gpaChart"></canvas>
-                    <div style="text-align: center; margin-top: 1rem;">
-                        <strong>Current GPA:</strong> <span id="current-gpa">0.00</span>
+            <div class="graphs-container">
+                <div class="graphs-row">
+                    <div class="graph-card">
+                        <h3>GPA Overview</h3>
+                        <div class="graph-content">
+                            <canvas id="gpaChart"></canvas>
+                            <div class="gpa-info">
+                                <strong>Current GPA:</strong> <span id="current-gpa">0.00</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <h3>GPA Trend</h3>
-                    <canvas id="gpaLineChart"></canvas>
+                    
+                    <div class="graph-card">
+                        <h3>GPA Trend</h3>
+                        <div class="graph-content">
+                            <canvas id="gpaLineChart"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
 

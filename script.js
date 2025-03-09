@@ -679,7 +679,15 @@ function generateSharableLink() {
     };
     const encodedData = btoa(JSON.stringify(data));
     const link = `${window.location.origin}${window.location.pathname}?data=${encodedData}`;
-    prompt("Share this link to save your progress:", link);
+    
+    // Set the flag indicating a link has been generated
+    window.linkGenerated = true;
+    
+    // Show the link to the user
+    const copied = prompt("Share this link to save your progress (press Ctrl+C to copy):", link);
+    
+    // Optional: Show a notification that the link was generated successfully
+    showNotification("Sharable link generated successfully!");
 }
 
 function loadFromSharableLink() {
@@ -714,12 +722,52 @@ function handleDrop(e) {
     draggedCourseId = null;
 }
 
+// Window event listener for beforeunload
+window.addEventListener('beforeunload', function(e) {
+    // The message actually shown depends on the browser and some browsers 
+    // don't allow customizing the message at all for security reasons
+    const confirmationMessage = 'You have unsaved changes. Please remember to generate and save a sharable link before leaving.';
+    e.returnValue = confirmationMessage;
+    return confirmationMessage;
+});
+
 function updateMajor() {
+    // If there are courses, show confirmation dialog
+    if (courses.length > 0) {
+        const confirmed = confirm("Changing your major will reset your course plan. Have you saved your current progress with a sharable link?");
+        if (!confirmed) {
+            // Reset the dropdown to the previous value
+            const major = document.getElementById('major-select');
+            const currentMajorCourses = courses.length > 0 ? courses[0].id.substring(0, 4) : 'CPSC';
+            
+            // Match the prefix to a major
+            let previousMajor;
+            if (currentMajorCourses === 'CPSC') {
+                previousMajor = 'Computer Science';
+            } else if (currentMajorCourses === 'MATH') {
+                previousMajor = 'Mathematics';
+            } else if (currentMajorCourses === 'PHYS') {
+                previousMajor = 'Physics';
+            } else {
+                previousMajor = 'Computer Science'; // Default
+            }
+            
+            major.value = previousMajor;
+            return;
+        }
+    }
+    
+    // Proceed with updating the major
     const major = document.getElementById('major-select').value;
     initializeCoursesForMajor(major);
     requiredCourses = courses.filter(course => MAJOR_REQUIREMENTS[major].includes(course.id));
     renderRequiredCourses();
     renderCourses();
+}
+
+function hasGeneratedLink() {
+    // A simple flag that gets set when a link is generated
+    return window.linkGenerated === true;
 }
 
 function renderRequiredCourses() {
@@ -770,6 +818,400 @@ function initialize() {
     
     // Try to load from sharable link if available
     loadFromSharableLink();
+}
+
+function updateAllGraphs() {
+    updateGPAChart();
+    updateRequirementProgressChart();
+    updateCourseDistributionChart();
+    updatePrerequisiteFlowChart();
+}
+
+function updateRequirementProgressChart() {
+    const ctx = document.getElementById('requirementProgressChart').getContext('2d');
+    
+    // Get the major
+    const major = document.getElementById('major-select').value;
+    const requiredCourseIds = MAJOR_REQUIREMENTS[major];
+    
+    // Count completed required courses
+    const completedRequired = courses.filter(course => 
+        requiredCourseIds.includes(course.id) && 
+        course.completed && 
+        PASSING_GRADES.includes(course.grade)
+    ).length;
+    
+    // Calculate percentage
+    const totalRequired = requiredCourseIds.length;
+    const percentComplete = Math.round((completedRequired / totalRequired) * 100);
+    
+    // Create or update the chart
+    if (window.requirementChart) {
+        window.requirementChart.destroy();
+    }
+    
+    window.requirementChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Completed', 'Remaining'],
+            datasets: [{
+                data: [completedRequired, totalRequired - completedRequired],
+                backgroundColor: ['#4CAF50', '#f0f0f0'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: { 
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: ${context.raw} of ${totalRequired} courses`;
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: `Major Requirements: ${percentComplete}% Complete`,
+                    font: { size: 14 }
+                }
+            },
+            cutout: '70%'
+        }
+    });
+    
+    // Add center text with percentage
+    const centerText = {
+        id: 'centerText',
+        afterDraw: function(chart) {
+            const width = chart.width;
+            const height = chart.height;
+            const ctx = chart.ctx;
+            
+            ctx.restore();
+            ctx.font = "bold 24px Arial";
+            ctx.textBaseline = "middle";
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#333";
+            ctx.fillText(`${percentComplete}%`, width / 2, height / 2);
+            ctx.save();
+        }
+    };
+    
+    // Add plugin if not already added
+    if (!window.requirementChart.options.plugins.centerText) {
+        window.requirementChart.options.plugins.centerText = true;
+        window.requirementChart.register(centerText);
+    }
+}
+
+function updateCourseDistributionChart() {
+    const ctx = document.getElementById('courseDistributionChart').getContext('2d');
+    
+    // Calculate course distribution by year and term
+    const distribution = {
+        'Year 1': { Fall: 0, Winter: 0, Spring: 0, Summer: 0 },
+        'Year 2': { Fall: 0, Winter: 0, Spring: 0, Summer: 0 },
+        'Year 3': { Fall: 0, Winter: 0, Spring: 0, Summer: 0 },
+        'Year 4': { Fall: 0, Winter: 0, Spring: 0, Summer: 0 }
+    };
+    
+    // Add extra years if they exist
+    const years = [...new Set(courses.map(course => course.year))];
+    years.forEach(year => {
+        if (year > 4) {
+            distribution[`Year ${year}`] = { Fall: 0, Winter: 0, Spring: 0, Summer: 0 };
+        }
+    });
+    
+    // Count courses by year and term
+    courses.forEach(course => {
+        const yearKey = `Year ${course.year}`;
+        if (distribution[yearKey]) {
+            distribution[yearKey][course.term]++;
+        }
+    });
+    
+    // Calculate credit load for each term
+    const creditLoad = {};
+    Object.keys(distribution).forEach(year => {
+        creditLoad[year] = {};
+        Object.keys(distribution[year]).forEach(term => {
+            const termCourses = courses.filter(course => 
+                `Year ${course.year}` === year && course.term === term
+            );
+            creditLoad[year][term] = termCourses.reduce((sum, course) => sum + course.credits, 0);
+        });
+    });
+    
+    // Create datasets for the chart
+    const labels = Object.keys(distribution);
+    const datasets = ['Fall', 'Winter', 'Spring', 'Summer'].map((term, index) => {
+        const colors = ['#2196F3', '#4CAF50', '#FFC107', '#F44336'];
+        return {
+            label: term,
+            data: labels.map(year => creditLoad[year][term]),
+            backgroundColor: colors[index]
+        };
+    });
+    
+    // Create or update the chart
+    if (window.distributionChart) {
+        window.distributionChart.destroy();
+    }
+    
+    window.distributionChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Credit Distribution by Term',
+                    font: { size: 14 }
+                },
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const yearIndex = context.dataIndex;
+                            const term = context.dataset.label;
+                            const year = labels[yearIndex];
+                            const credits = context.raw;
+                            const courseCount = distribution[year][term];
+                            return `${term}: ${credits} credits (${courseCount} courses)`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { stacked: true },
+                y: { 
+                    stacked: true,
+                    title: {
+                        display: true,
+                        text: 'Credits'
+                    },
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function updateCourseDistributionChart() {
+    const ctx = document.getElementById('courseDistributionChart').getContext('2d');
+    
+    // Calculate course distribution by year and term
+    const distribution = {
+        'Year 1': { Fall: 0, Winter: 0, Spring: 0, Summer: 0 },
+        'Year 2': { Fall: 0, Winter: 0, Spring: 0, Summer: 0 },
+        'Year 3': { Fall: 0, Winter: 0, Spring: 0, Summer: 0 },
+        'Year 4': { Fall: 0, Winter: 0, Spring: 0, Summer: 0 }
+    };
+    
+    // Add extra years if they exist
+    const years = [...new Set(courses.map(course => course.year))];
+    years.forEach(year => {
+        if (year > 4) {
+            distribution[`Year ${year}`] = { Fall: 0, Winter: 0, Spring: 0, Summer: 0 };
+        }
+    });
+    
+    // Count courses by year and term
+    courses.forEach(course => {
+        const yearKey = `Year ${course.year}`;
+        if (distribution[yearKey]) {
+            distribution[yearKey][course.term]++;
+        }
+    });
+    
+    // Calculate credit load for each term
+    const creditLoad = {};
+    Object.keys(distribution).forEach(year => {
+        creditLoad[year] = {};
+        Object.keys(distribution[year]).forEach(term => {
+            const termCourses = courses.filter(course => 
+                `Year ${course.year}` === year && course.term === term
+            );
+            creditLoad[year][term] = termCourses.reduce((sum, course) => sum + course.credits, 0);
+        });
+    });
+    
+    // Create datasets for the chart
+    const labels = Object.keys(distribution);
+    const datasets = ['Fall', 'Winter', 'Spring', 'Summer'].map((term, index) => {
+        const colors = ['#2196F3', '#4CAF50', '#FFC107', '#F44336'];
+        return {
+            label: term,
+            data: labels.map(year => creditLoad[year][term]),
+            backgroundColor: colors[index]
+        };
+    });
+    
+    // Create or update the chart
+    if (window.distributionChart) {
+        window.distributionChart.destroy();
+    }
+    
+    window.distributionChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Credit Distribution by Term',
+                    font: { size: 14 }
+                },
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const yearIndex = context.dataIndex;
+                            const term = context.dataset.label;
+                            const year = labels[yearIndex];
+                            const credits = context.raw;
+                            const courseCount = distribution[year][term];
+                            return `${term}: ${credits} credits (${courseCount} courses)`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { stacked: true },
+                y: { 
+                    stacked: true,
+                    title: {
+                        display: true,
+                        text: 'Credits'
+                    },
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function updatePrerequisiteFlowChart() {
+    const ctx = document.getElementById('prerequisiteFlowChart').getContext('2d');
+    
+    // Analyze prerequisites for completed courses
+    const prerequisiteCompletion = {};
+    const completedCourses = courses.filter(course => course.completed);
+    
+    completedCourses.forEach(course => {
+        prerequisiteCompletion[course.id] = {
+            completed: course.completed && PASSING_GRADES.includes(course.grade),
+            prerequisites: course.prerequisite.map(prereqId => {
+                const prereq = courses.find(c => c.id === prereqId);
+                return {
+                    id: prereqId,
+                    completed: prereq ? (prereq.completed && PASSING_GRADES.includes(prereq.grade)) : false
+                };
+            })
+        };
+    });
+    
+    // Calculate prerequisite completion rate
+    const prereqStats = completedCourses.map(course => {
+        if (course.prerequisite.length === 0) return null;
+        
+        const prereqsCompleted = course.prerequisite.filter(prereqId => {
+            const prereq = courses.find(c => c.id === prereqId);
+            return prereq && prereq.completed && PASSING_GRADES.includes(prereq.grade);
+        }).length;
+        
+        return {
+            id: course.id,
+            name: course.name,
+            totalPrereqs: course.prerequisite.length,
+            completedPrereqs: prereqsCompleted,
+            percent: prereqsCompleted / course.prerequisite.length * 100
+        };
+    }).filter(stat => stat !== null);
+    
+    // Find courses with most complex prerequisite chains
+    const coursesByPrereqCount = [...prereqStats].sort((a, b) => b.totalPrereqs - a.totalPrereqs);
+    const topCourses = coursesByPrereqCount.slice(0, 5);
+    
+    // Create or update the chart
+    if (window.prereqChart) {
+        window.prereqChart.destroy();
+    }
+    
+    window.prereqChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Prerequisite Planning', 'Course Timing', 'Requirement Completion', 'Credit Balance', 'Term Distribution'],
+            datasets: [{
+                label: 'Your Degree Plan',
+                data: calculatePlanningMetrics(),
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgb(54, 162, 235)',
+                pointBackgroundColor: 'rgb(54, 162, 235)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgb(54, 162, 235)'
+            }]
+        },
+        options: {
+            elements: {
+                line: {
+                    borderWidth: 3
+                }
+            },
+            scales: {
+                r: {
+                    angleLines: {
+                        display: true
+                    },
+                    suggestedMin: 0,
+                    suggestedMax: 100
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Degree Plan Quality Assessment',
+                    font: { size: 14 }
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+    
+    // Show details about highest complexity prerequisite chains
+    const detailsDiv = document.getElementById('prereqFlowDetails');
+    detailsDiv.innerHTML = `
+        <h4>Courses with Complex Prerequisites</h4>
+        <div class="prereq-details">
+            ${topCourses.map(course => `
+                <div class="prereq-item">
+                    <div class="prereq-header">
+                        <span>${course.id}</span>
+                        <span>${course.completedPrereqs}/${course.totalPrereqs} prerequisites completed</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: ${course.percent}%;"></div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
 }
 
 // Event listeners

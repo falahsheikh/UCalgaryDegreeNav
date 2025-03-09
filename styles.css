@@ -269,7 +269,10 @@ button:hover {
 }
 
 .add-year-button {
-    margin-bottom: 1rem;
+    width: 250px; 
+    margin: 0 auto; 
+    display: block;
+    margin-left: 46%;
 }
 
 .course-dropdown {
@@ -356,4 +359,62 @@ button:hover {
 
 .color-legend-item.requirement-not-met div {
     background-color: #ffedd5; /* Orange for requirement not met */
+}
+
+.graphs-container {
+    margin-top: 2rem;
+}
+
+.graphs-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.graph-card {
+    flex: 1;
+    min-width: 300px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+}
+
+.graph-card h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.graph-content {
+    height: 250px;
+    position: relative;
+}
+
+.gpa-info {
+    text-align: center;
+    margin-top: -18.4rem;
+    font-size: 1.1rem;
+    margin-left: 20rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .graphs-row {
+        flex-direction: column;
+    }
+    
+    .graph-card {
+        width: 100%;
+    }
+}
+
+/* Make sure canvas elements maintain proper sizing */
+canvas {
+    max-width: 100%;
+    height: 100% !important;
 }
