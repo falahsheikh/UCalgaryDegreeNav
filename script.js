@@ -479,10 +479,21 @@ function addCourseToTerm(year, term) {
 }
 
 function deleteCourse(id) {
-    courses = courses.filter(course => course.id !== id); // Remove the course
-    updateRequiredCourses(); // Update the required courses list
-    renderCourses(); // Immediately refresh the UI
+    // Remove the course with the specified id
+    courses = courses.filter(course => course.id !== id);
+    
+    // Update the required courses list
+    updateRequiredCourses();
+    
+    // Force a UI refresh
+    renderCourses();
 }
+
+function updateRequiredCourses() {
+    const major = document.getElementById('major-select').value;
+    requiredCourses = courses.filter(course => MAJOR_REQUIREMENTS[major].includes(course.id));
+}
+
 
 function setDPlusLimit() {
     const limit = parseInt(document.getElementById('d-plus-limit').value);
