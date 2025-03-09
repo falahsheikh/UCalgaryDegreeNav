@@ -306,6 +306,8 @@ function updateCreditCounter() {
     creditCounter.style.borderStyle = 'solid';
     creditCounter.style.borderColor = '#ffffff #808080 #808080 #ffffff';
     creditCounter.style.backgroundColor = '#d4d0c8'; // Classic Windows gray
+
+    creditCounter.style.marginLeft = '30%';
     
     // Add hover and active states
     creditCounter.onmouseover = function() {
@@ -455,6 +457,41 @@ function canAddCourse(year, term) {
     );
     return availableCourses.length > 0;
 }
+
+function showNotification(message) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+    notification.style.position = 'fixed';
+    notification.style.top = '20px';
+    notification.style.right = '20px';
+    notification.style.backgroundColor = '#4CAF50';
+    notification.style.color = 'white';
+    notification.style.padding = '15px';
+    notification.style.borderRadius = '5px';
+    notification.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    notification.style.zIndex = '1000';
+    notification.style.opacity = '0';
+    notification.style.transition = 'opacity 0.3s ease-in-out';
+    
+    // Add to document
+    document.body.appendChild(notification);
+    
+    // Fade in
+    setTimeout(() => {
+        notification.style.opacity = '1';
+    }, 10);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
 function addYear() {
     const years = [...new Set(courses.map(course => course.year))];
     const maxYear = years.length > 0 ? Math.max(...years) : 4; // Default to 4 if no courses
@@ -502,6 +539,9 @@ function addYear() {
     
     // Render the courses to show the new year
     renderCourses();
+    
+    // Show notification
+    showNotification(`Year ${newYear} has been added successfully!`);
     
     // Automatically scroll to the new year section
     setTimeout(() => {
