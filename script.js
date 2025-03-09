@@ -401,35 +401,47 @@ function addYear() {
     const maxYear = years.length > 0 ? Math.max(...years) : 0;
     const newYear = maxYear + 1;
 
-    // Check if the previous year is empty
+    // Check if the previous year has at least one course
     const previousYearCourses = courses.filter(course => course.year === maxYear);
     if (maxYear > 0 && previousYearCourses.length === 0) {
-        alert(`Cannot add Year ${newYear} because Year ${maxYear} is empty.`);
+        alert(`Cannot add Year ${newYear} because Year ${maxYear} is empty. Please add at least one course to Year ${maxYear} first.`);
         return;
     }
 
     // Prompt the user for confirmation
-    const confirmAdd = confirm("Are you sure you want to add a new year?");
+    const confirmAdd = confirm(`Are you sure you want to add Year ${newYear}?`);
     if (!confirmAdd) {
         return;
     }
 
-    // Add a placeholder course for the new year to ensure it appears in the UI
+    // Add a default course for the Fall term of the new year
     const major = document.getElementById('major-select').value;
-    const placeholderCourse = {
-        id: 'PLACEHOLDER', // Temporary placeholder ID
-        name: 'Placeholder Course',
-        credits: 0,
-        prerequisite: [],
-        term: 'Fall',
-        year: newYear,
-        completed: false,
-        grade: null,
-        required: false
-    };
+    const availableCourses = AVAILABLE_COURSES[major].filter(course => 
+        !courses.some(c => c.id === course.id)
+    );
 
-    courses.push(placeholderCourse); // Add the placeholder course
-    renderCourses(); // Refresh the UI
+    if (availableCourses.length === 0) {
+        alert("No available courses to add to the new year. Cannot create a new year without available courses.");
+        return;
+    }
+
+    // Update year-filter dropdown to include the new year
+    const yearFilter = document.getElementById('year-filter');
+    const newYearOption = document.createElement('option');
+    newYearOption.value = newYear;
+    newYearOption.textContent = `Year ${newYear}`;
+    yearFilter.appendChild(newYearOption);
+    
+    // Render the courses to show the new year
+    renderCourses();
+    
+    // Automatically scroll to the new year section
+    setTimeout(() => {
+        const newYearSection = document.querySelector(`.year-section h3:contains('Year ${newYear}')`);
+        if (newYearSection) {
+            newYearSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, 100);
 }
 
 function addCourseToTerm(year, term) {
@@ -443,6 +455,20 @@ function addCourseToTerm(year, term) {
         return;
     }
 
+    // Check if the term container already has a course selection dropdown
+    const termContainer = document.querySelector(`.term-container[data-year="${year}"][data-term="${term}"]`);
+    const existingDropdown = termContainer.querySelector('.course-selection-container');
+    
+    if (existingDropdown) {
+        // If a dropdown already exists, remove it
+        termContainer.removeChild(existingDropdown);
+        return;
+    }
+
+    // Create a container for the dropdown and button
+    const selectionContainer = document.createElement('div');
+    selectionContainer.className = 'course-selection-container';
+    
     const dropdown = document.createElement('select');
     dropdown.className = 'course-dropdown';
     dropdown.innerHTML = `
@@ -452,8 +478,12 @@ function addCourseToTerm(year, term) {
         `).join('')}
     `;
 
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'selection-buttons';
+    
     const confirmButton = document.createElement('button');
-    confirmButton.textContent = 'Add Course';
+    confirmButton.textContent = 'Add';
+    confirmButton.className = 'confirm-button';
     confirmButton.onclick = () => {
         const courseId = dropdown.value;
         if (!courseId) {
@@ -468,14 +498,11 @@ function addCourseToTerm(year, term) {
         }
 
         const isRequired = MAJOR_REQUIREMENTS[major].includes(courseId);
-        if (isRequired) {
-            alert(`This course (${courseId}) is required for your major (${major}).`);
-        }
-
+        
         courses.push({
             id: courseId,
             name: course.name,
-            credits: 3,
+            credits: course.credits,
             prerequisite: course.prerequisite,
             term,
             year: parseInt(year),
@@ -483,13 +510,29 @@ function addCourseToTerm(year, term) {
             grade: null,
             required: isRequired
         });
+        
+        // Remove the selection container after adding the course
+        termContainer.removeChild(selectionContainer);
+        
         updateRequiredCourses();
         renderCourses();
     };
-
-    const termContainer = document.querySelector(`.term-container[data-year="${year}"][data-term="${term}"]`);
-    termContainer.appendChild(dropdown);
-    termContainer.appendChild(confirmButton);
+    
+    const cancelButton = document.createElement('button');
+    cancelButton.textContent = 'Cancel';
+    cancelButton.className = 'cancel-button';
+    cancelButton.onclick = () => {
+        // Remove the selection container when canceled
+        termContainer.removeChild(selectionContainer);
+    };
+    
+    buttonContainer.appendChild(confirmButton);
+    buttonContainer.appendChild(cancelButton);
+    
+    selectionContainer.appendChild(dropdown);
+    selectionContainer.appendChild(buttonContainer);
+    
+    termContainer.appendChild(selectionContainer);
 }
 
 function deleteCourse(id) {
