@@ -16,7 +16,7 @@
                 <span class="material-symbols-outlined">school</span>
                 University of Calgary Degree Navigator
                 <span class="badge" id="credit-counter" onclick="showCreditBreakdown()">0/120 Credits</span>
-                <span class="badge" id="d-plus-counter">0/<span id="max-d-plus">2</span> D+ Grades</span>
+                <span class="badge" id="d-plus-counter">0/<span id="max-d-plus">2</span> D Grades</span>
             </div>
         </div>
         <div class="card-content" style="padding: 1.5rem;">
@@ -136,9 +136,9 @@
                 </div>
             </div>
 
-            <!-- Set D+ Limit -->
+            <!-- Set D/D+ Limit -->
             <div style="margin-top: 1rem; text-align: right;">
-                <label for="d-plus-limit">Set Maximum D+ Grades Allowed:</label>
+                <label for="d-plus-limit">Set Maximum D/D+ Grades Allowed:</label>
                 <input type="number" id="d-plus-limit" min="0" value="2" style="width: 4rem; padding: 0.5rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px;">
                 <button onclick="setDPlusLimit()">Set Limit</button>
             </div>

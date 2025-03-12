@@ -8,29 +8,98 @@ const PASSING_GRADES = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-'];
 
 const AVAILABLE_COURSES = {
     'Computer Science': [
-        { id: 'CPSC231', name: 'Introduction to Computer Science', credits: 3, prerequisite: [] },
-        { id: 'CPSC233', name: 'Object-Oriented Programming', credits: 3, prerequisite: ['CPSC231'] },
-        { id: 'CPSC331', name: 'Data Structures and Algorithms', credits: 3, prerequisite: ['CPSC233', 'MATH271'] },
-        { id: 'MATH211', name: 'Linear Methods I', credits: 3, prerequisite: [] },
-        { id: 'MATH271', name: 'Discrete Mathematics', credits: 3, prerequisite: [] },
+        { id: 'CPSC231', name: 'Introduction to Computer Science', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1},
+        { id: 'CPSC233', name: 'Object-Oriented Programming', credits: 3, prerequisite: ['CPSC231'], defaultTerm: 'Winter', defaultYear: 1 },
+        { id: 'CPSC251', name: 'Introduction to Computer Systems', credits: 3, prerequisite: ['CPSC231'], defaultTerm: 'Winter', defaultYear: 1 },
+        { id: 'CPSC331', name: 'Data Structures and Algorithms', credits: 3, prerequisite: ['CPSC233'], defaultTerm: 'Fall', defaultYear: 2 },
+        { id: 'CPSC351', name: 'Computer Networks', credits: 3, prerequisite: ['CPSC251'], defaultTerm: 'Fall', defaultYear: 2 },
+        { id: 'CPSC355', name: 'Computer Architecture', credits: 3, prerequisite: ['CPSC251'], defaultTerm: 'Winter', defaultYear: 2 },
+        { id: 'CPSC413', name: 'Design and Analysis of Algorithms', credits: 3, prerequisite: ['CPSC331'], defaultTerm: 'Fall', defaultYear: 3 },
+        { id: 'CPSC449', name: 'Programming Paradigms', credits: 3, prerequisite: ['CPSC331'], defaultTerm: 'Winter', defaultYear: 3 },
+        { id: 'CPSC457', name: 'Operating Systems', credits: 3, prerequisite: ['CPSC355'], defaultTerm: 'Winter', defaultYear: 3 },
+        { id: 'SENG300', name: 'Software Engineering', credits: 3, prerequisite: ['CPSC233'], defaultTerm: 'Winter', defaultYear: 2 },
+        { id: 'MATH211', name: 'Linear Methods I', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
+        { id: 'MATH249', name: 'Introductory Calculus', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
+        { id: 'MATH265', name: 'Calculus I', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
+        { id: 'PHIL279', name: 'Logic I', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
+        { id: 'PHIL314', name: 'Information Technology Ethics', credits: 3, prerequisite: ['PHIL279'], defaultTerm: 'Fall', defaultYear: 2 }
     ],
     'Mathematics': [
-        { id: 'MATH211', name: 'Linear Methods I', credits: 3, prerequisite: [] },
-        { id: 'MATH271', name: 'Discrete Mathematics', credits: 3, prerequisite: [] },
-        { id: 'MATH311', name: 'Advanced Calculus', credits: 3, prerequisite: ['MATH211'] },
-        { id: 'MATH331', name: 'Abstract Algebra', credits: 3, prerequisite: ['MATH271'] },
+        { id: 'MATH211', name: 'Linear Methods I', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
+        { id: 'MATH249', name: 'Introductory Calculus', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
+        { id: 'MATH265', name: 'Calculus I', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
+        { id: 'MATH267', name: 'Calculus II', credits: 3, prerequisite: ['MATH249', 'MATH265'], defaultTerm: 'Winter', defaultYear: 1 },
+        { id: 'MATH271', name: 'Discrete Mathematics', credits: 3, prerequisite: [], defaultTerm: 'Winter', defaultYear: 1 },
+        { id: 'MATH311', name: 'Linear Methods II', credits: 3, prerequisite: ['MATH211'], defaultTerm: 'Fall', defaultYear: 2 },
+        { id: 'MATH315', name: 'Algebra I', credits: 3, prerequisite: ['MATH271'], defaultTerm: 'Fall', defaultYear: 2 },
+        { id: 'MATH335', name: 'Analysis I', credits: 3, prerequisite: ['MATH267', 'MATH271'], defaultTerm: 'Winter', defaultYear: 2 },
+        { id: 'MATH367', name: 'Multivariable Calculus', credits: 3, prerequisite: ['MATH267', 'MATH211'], defaultTerm: 'Fall', defaultYear: 2 },
+        { id: 'MATH375', name: 'Differential Equations for Engineers', credits: 3, prerequisite: ['MATH267'], defaultTerm: 'Winter', defaultYear: 2 },
+        { id: 'MATH376', name: 'Ordinary Differential Equations', credits: 3, prerequisite: ['MATH267'], defaultTerm: 'Winter', defaultYear: 2 },
+        { id: 'MATH431', name: 'Algebra II', credits: 3, prerequisite: ['MATH315'], defaultTerm: 'Fall', defaultYear: 3 },
+        { id: 'MATH435', name: 'Analysis II', credits: 3, prerequisite: ['MATH335'], defaultTerm: 'Fall', defaultYear: 3 },
+        { id: 'MATH516', name: 'Senior Project', credits: 3, prerequisite: [], defaultTerm: 'Winter', defaultYear: 4 },
+        { id: 'MATH518', name: 'Honours Thesis', credits: 3, prerequisite: [], defaultTerm: 'Winter', defaultYear: 4 },
+        { id: 'CPSC217', name: 'Introduction to Computer Science for Multidisciplinary Studies', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
+        { id: 'STAT321', name: 'Introduction to Probability', credits: 3, prerequisite: ['MATH267'], defaultTerm: 'Fall', defaultYear: 2 },
+        { id: 'STAT323', name: 'Introduction to Statistical Inference', credits: 3, prerequisite: ['STAT321'], defaultTerm: 'Winter', defaultYear: 2 },
+        { id: 'STAT517', name: 'Statistical Project', credits: 3, prerequisite: [], defaultTerm: 'Winter', defaultYear: 4 }
     ],
     'Physics': [
-        { id: 'PHYS211', name: 'Classical Mechanics', credits: 3, prerequisite: [] },
-        { id: 'PHYS221', name: 'Electromagnetism', credits: 3, prerequisite: ['PHYS211'] },
-        { id: 'PHYS311', name: 'Quantum Mechanics', credits: 3, prerequisite: ['PHYS221'] },
+        { id: 'PHYS227', name: 'Classical Physics', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
+        { id: 'PHYS229', name: 'Modern Physics', credits: 3, prerequisite: ['PHYS227'], defaultTerm: 'Winter', defaultYear: 1 },
+        { id: 'PHYS341', name: 'Classical Mechanics I', credits: 3, prerequisite: ['PHYS227', 'MATH211', 'MATH267'], defaultTerm: 'Fall', defaultYear: 2 },
+        { id: 'PHYS343', name: 'Classical Mechanics II', credits: 3, prerequisite: ['PHYS341'], defaultTerm: 'Winter', defaultYear: 2 },
+        { id: 'PHYS355', name: 'Electromagnetic Theory I', credits: 3, prerequisite: ['PHYS227', 'MATH211', 'MATH267'], defaultTerm: 'Fall', defaultYear: 2 },
+        { id: 'PHYS375', name: 'Introduction to Optics and Waves', credits: 3, prerequisite: ['PHYS227'], defaultTerm: 'Fall', defaultYear: 2 },
+        { id: 'PHYS381', name: 'Computational Physics', credits: 3, prerequisite: ['PHYS227', 'MATH211'], defaultTerm: 'Winter', defaultYear: 2 },
+        { id: 'PHYS397', name: 'Applied Physics Laboratory I', credits: 3, prerequisite: ['PHYS229'], defaultTerm: 'Fall', defaultYear: 3 },
+        { id: 'PHYS435', name: 'Quantum Mechanics I', credits: 3, prerequisite: ['PHYS229', 'MATH311'], defaultTerm: 'Fall', defaultYear: 3 },
+        { id: 'PHYS443', name: 'Quantum Mechanics II', credits: 3, prerequisite: ['PHYS435'], defaultTerm: 'Winter', defaultYear: 3 },
+        { id: 'PHYS449', name: 'Statistical Mechanics', credits: 3, prerequisite: ['PHYS343', 'PHYS435'], defaultTerm: 'Fall', defaultYear: 3 },
+        { id: 'PHYS451', name: 'Statistical Mechanics II', credits: 3, prerequisite: ['PHYS449'], defaultTerm: 'Winter', defaultYear: 3 },
+        { id: 'PHYS455', name: 'Electromagnetic Theory II', credits: 3, prerequisite: ['PHYS355'], defaultTerm: 'Winter', defaultYear: 3 },
+        { id: 'PHYS457', name: 'Experimental Methods', credits: 3, prerequisite: ['PHYS355', 'PHYS381'], defaultTerm: 'Winter', defaultYear: 3 },
+        { id: 'PHYS481', name: 'Solid State Physics', credits: 3, prerequisite: ['PHYS435'], defaultTerm: 'Fall', defaultYear: 4 },
+        { id: 'PHYS497', name: 'Applied Physics Laboratory II', credits: 3, prerequisite: ['PHYS397'], defaultTerm: 'Winter', defaultYear: 3 },
+        { id: 'PHYS501', name: 'Physics Research', credits: 3, prerequisite: ['PHYS457'], defaultTerm: 'Fall', defaultYear: 4 },
+        { id: 'PHYS543', name: 'Quantum Mechanics III', credits: 3, prerequisite: ['PHYS443'], defaultTerm: 'Fall', defaultYear: 4 },
+        { id: 'PHYS597', name: 'Senior Physics Laboratory', credits: 3, prerequisite: ['PHYS497'], defaultTerm: 'Fall', defaultYear: 4 },
+        { id: 'PHYS598A', name: 'Senior Honours Research I', credits: 3, prerequisite: ['PHYS497'], defaultTerm: 'Fall', defaultYear: 4 },
+        { id: 'PHYS598B', name: 'Senior Honours Research II', credits: 3, prerequisite: ['PHYS598A'], defaultTerm: 'Winter', defaultYear: 4 },
+        { id: 'PHYS599', name: 'Senior Research Thesis', credits: 3, prerequisite: ['PHYS497'], defaultTerm: 'Fall', defaultYear: 4 },
+        { id: 'MATH211', name: 'Linear Methods I', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
+        { id: 'MATH249', name: 'Introductory Calculus', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
+        { id: 'MATH265', name: 'Calculus I', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
+        { id: 'MATH267', name: 'Calculus II', credits: 3, prerequisite: ['MATH249', 'MATH265'], defaultTerm: 'Winter', defaultYear: 1 },
+        { id: 'MATH311', name: 'Linear Methods II', credits: 3, prerequisite: ['MATH211'], defaultTerm: 'Fall', defaultYear: 2 },
+        { id: 'MATH367', name: 'Multivariable Calculus', credits: 3, prerequisite: ['MATH267', 'MATH211'], defaultTerm: 'Fall', defaultYear: 2 },
+        { id: 'MATH375', name: 'Differential Equations for Engineers', credits: 3, prerequisite: ['MATH267'], defaultTerm: 'Winter', defaultYear: 2 },
+        { id: 'MATH376', name: 'Ordinary Differential Equations', credits: 3, prerequisite: ['MATH267'], defaultTerm: 'Winter', defaultYear: 2 },
+        { id: 'CHEM201', name: 'General Chemistry I', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
+        { id: 'BIOL211', name: 'Principles of Cellular Biology', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
+        { id: 'CPSC217', name: 'Introduction to Computer Science for Multidisciplinary Studies', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
+        { id: 'DATA211', name: 'Introduction to Data Science', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 }
     ]
 };
 
 const MAJOR_REQUIREMENTS = {
-    'Computer Science': ['CPSC231', 'CPSC233', 'CPSC331'],
-    'Mathematics': ['MATH211', 'MATH271', 'MATH311', 'MATH331'],
-    'Physics': ['PHYS211', 'PHYS221', 'PHYS311']
+    'Computer Science': [
+        'CPSC231', 'CPSC233', 'CPSC251', 'CPSC331', 'CPSC351', 'CPSC355', 
+        'CPSC413', 'CPSC449', 'CPSC457', 'SENG300', 'MATH211', 
+        'MATH249', 'PHIL279', 'PHIL314'
+    ],
+    'Mathematics': [
+        'MATH211', 'MATH249', 'MATH267', 'MATH271', 'MATH311', 
+        'MATH315', 'MATH367', 'MATH376', 'STAT321', 'STAT323', 
+        'CPSC217', 'MATH516'
+    ],
+    'Physics': [
+        'PHYS227', 'PHYS229', 'PHYS341', 'PHYS343', 'PHYS355', 'PHYS375', 
+        'PHYS381', 'PHYS397', 'PHYS435', 'PHYS443', 'PHYS449', 'PHYS455', 
+        'PHYS457', 'PHYS497', 'PHYS501', 'MATH211', 'MATH249', 'MATH267', 
+        'MATH311', 'MATH367', 'MATH376', 'CPSC217'
+    ]
 };
 
 let courses = [];
@@ -41,14 +110,19 @@ let gpaChart = null;
 let gpaLineChart = null;
 
 function initializeCoursesForMajor(major) {
-    courses = AVAILABLE_COURSES[major].map(course => ({
-        ...course,
-        term: 'Fall',
-        year: 1,
-        completed: false,
-        grade: null,
-        required: MAJOR_REQUIREMENTS[major].includes(course.id)
-    }));
+    // Create an array of course objects from AVAILABLE_COURSES
+    // Only include courses that have both defaultTerm and defaultYear
+    courses = AVAILABLE_COURSES[major]
+        .filter(course => course.defaultTerm !== undefined && course.defaultYear !== undefined)
+        .map(course => ({
+            ...course,
+            term: course.defaultTerm,
+            year: course.defaultYear,
+            completed: false,
+            grade: null,
+            required: MAJOR_REQUIREMENTS[major].includes(course.id)
+        }));
+    
     requiredCourses = courses.filter(course => course.required);
     
     // Ensure the year filter dropdown has options for years 1-4
@@ -210,10 +284,10 @@ function createCourseCard(course) {
         e.dataTransfer.setData('text/plain', course.id);
     };
 
-    const dPlusWarning = course.grade === 'D+' && course.prerequisite.length > 0 ?
-        `<div style="color: #dc2626; font-size: 0.875rem; margin-top: 0.5rem;">
-            Warning: D+ grade cannot be used as a prerequisite.
-        </div>` : '';
+    const dPlusWarning = ['D+', 'D', 'F'].includes(course.grade) && course.prerequisite.length > 0 ?
+    `<div style="color: #dc2626; font-size: 0.875rem; margin-top: 0.5rem;">
+        Warning: ${course.grade} grade cannot be used as a prerequisite.
+    </div>` : '';
 
     card.innerHTML = `
         <div class="course-header">
@@ -260,8 +334,13 @@ function toggleCompletion(id) {
 }
 
 function updateGrade(id, grade) {
-    if (grade === 'D+' && countDPlusGrades() >= maxDPlusAllowed) {
-        alert(`You have already used the maximum allowed D+ grades (${maxDPlusAllowed}).`);
+    const course = courses.find(c => c.id === id);
+    
+    // If changing from a non-D/D+ grade to a D/D+ grade
+    if ((grade === 'D+' || grade === 'D') && 
+        !(course.grade === 'D+' || course.grade === 'D') && 
+        countDPlusGrades() >= maxDPlusAllowed) {
+        alert(`You have already used the maximum allowed D/D+ grades (${maxDPlusAllowed}).`);
         return;
     }
     
@@ -286,16 +365,17 @@ function updateGrade(id, grade) {
 }
 
 function countDPlusGrades() {
-    return courses.filter(course => course.grade === 'D+').length;
+    return courses.filter(course => course.grade === 'D' || course.grade === 'D+').length;
 }
 
 function updateDPlusCounter() {
     const dPlusCount = countDPlusGrades();
-    document.getElementById('d-plus-counter').textContent = `${dPlusCount}/${maxDPlusAllowed} D+ Grades`;
+    document.getElementById('d-plus-counter').textContent = `${dPlusCount} of ${maxDPlusAllowed} D/D+ Grades`;
 }
 
 function updateCreditCounter() {
-    const total = courses.reduce((sum, course) => course.completed ? sum + course.credits : sum, 0);
+    const total = courses.reduce((sum, course) => 
+        course.completed && course.grade !== 'F' ? sum + course.credits : sum, 0);
     const creditCounter = document.getElementById('credit-counter');
     
     // Set the text
@@ -344,7 +424,7 @@ function showCreditBreakdown() {
                        major === 'Mathematics' ? 'MATH' : 
                        major === 'Physics' ? 'PHYS' : '';
 
-    courses.filter(course => course.completed).forEach(course => {
+    courses.filter(course => course.completed && course.grade !== 'F').forEach(course => {
         const level = course.id.match(/\d+/)[0].charAt(0) + '00';
         if (course.id.startsWith(majorPrefix)) {
             breakdown[level].major += course.credits;
@@ -555,6 +635,8 @@ function addYear() {
 
 function addCourseToTerm(year, term) {
     const major = document.getElementById('major-select').value;
+    
+    // Get all courses from AVAILABLE_COURSES that aren't already in the courses array
     const availableCourses = AVAILABLE_COURSES[major].filter(course => 
         !courses.some(c => c.id === course.id)
     );
@@ -663,7 +745,7 @@ function updateRequiredCourses() {
 function setDPlusLimit() {
     const limit = parseInt(document.getElementById('d-plus-limit').value);
     if (isNaN(limit) || limit < 0) {
-        alert("Invalid D+ limit. Please enter a positive number.");
+        alert("Invalid D/D+ limit. Please enter a positive number.");
         return;
     }
     maxDPlusAllowed = limit;
@@ -739,7 +821,7 @@ function loadFromSharableLink() {
                 majorSelect.value = decodedData.major;
             }
 
-            // Update the D+ limit display
+            // Update the D limit display
             const maxDPlusElement = document.getElementById('max-d-plus');
             if (maxDPlusElement) {
                 maxDPlusElement.textContent = maxDPlusAllowed;
