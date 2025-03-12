@@ -22,7 +22,66 @@ const AVAILABLE_COURSES = {
         { id: 'MATH249', name: 'Introductory Calculus', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
         { id: 'MATH265', name: 'Calculus I', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
         { id: 'PHIL279', name: 'Logic I', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
-        { id: 'PHIL314', name: 'Information Technology Ethics', credits: 3, prerequisite: ['PHIL279'], defaultTerm: 'Fall', defaultYear: 2 }
+        { id: 'PHIL314', name: 'Information Technology Ethics', credits: 3, prerequisite: ['PHIL279'], defaultTerm: 'Fall', defaultYear: 2 },
+        { id: 'CPSC235', name: 'Introduction to Computer Science for Computer Science Majors II', credits: 3, prerequisite: ['CPSC233'] },
+        { id: 'CPSC313', name: 'Introduction to Computability', credits: 3, prerequisite: ['CPSC235', 'MATH271'] },
+        { id: 'CPSC319', name: 'Data Structures, Algorithms, and Their Applications', credits: 3, prerequisite: ['CPSC231', 'MATH271'] },
+        { id: 'CPSC329', name: 'Explorations in Information Security and Privacy', credits: 3, prerequisite: ['CPSC231'] },
+        { id: 'CPSC359', name: 'Computing Machinery II', credits: 3, prerequisite: ['CPSC355'] },
+        { id: 'CPSC418', name: 'Introduction to Cryptography', credits: 3, prerequisite: ['CPSC319', 'MATH271'] },
+        { id: 'CPSC441', name: 'Computer Networks', credits: 3, prerequisite: ['CPSC319'] },
+        { id: 'CPSC481', name: 'Human-Computer Interaction I', credits: 3, prerequisite: ['CPSC319'] },
+        { id: 'CPSC501', name: 'Advanced Programming Techniques', credits: 3, prerequisite: ['CPSC319'] },
+        { id: 'CPSC525', name: 'Principles of Computer Security', credits: 3, prerequisite: ['CPSC329'] },
+        { id: 'CPSC526', name: 'Network Systems Security', credits: 3, prerequisite: ['CPSC329'] },
+        { id: 'CPSC531', name: 'Systems Modelling and Simulation', credits: 3, prerequisite: ['CPSC319'] },
+        { id: 'CPSC535', name: 'Introduction to Image Processing and Computer Vision', credits: 3, prerequisite: ['CPSC319'] },
+        { id: 'CPSC567', name: 'Foundations of Multi-Agent Systems', credits: 3, prerequisite: ['CPSC319'] },
+        { id: 'MATH271', name: 'Discrete Mathematics', credits: 3, prerequisite: ['MATH30'] },
+        { id: 'MATH311', name: 'Linear Methods II', credits: 3, prerequisite: ['MATH211'] },
+        { id: 'MATH375', name: 'Introduction to Numerical Methods', credits: 3, prerequisite: ['MATH211', 'MATH267'] },
+        { id: 'PHYS211', name: 'Mechanics', credits: 3, prerequisite: ['PHYS30', 'MATH31'] },
+        { id: 'PHYS221', name: 'Electricity and Magnetism', credits: 3, prerequisite: ['PHYS211', 'MATH211'] },
+        { id: 'PHYS341', name: 'Classical Mechanics I', credits: 3, prerequisite: ['PHYS211', 'MATH211'] },
+        { id: 'ENGG201', name: 'Behaviour of Liquids, Gases and Solids', credits: 3, prerequisite: ['PHYS30', 'MATH31'] },
+        { id: 'ENGG202', name: 'Engineering Statics', credits: 3, prerequisite: ['PHYS30', 'MATH31'] },
+        { id: 'ENGG225', name: 'Fundamentals of Electrical Circuits and Machines', credits: 3, prerequisite: ['PHYS30', 'MATH31'] },
+        { id: 'ENGG233', name: 'Engineering Principles and Professionalism', credits: 3, prerequisite: [] },
+        { id: 'ENGG311', name: 'Engineering Thermodynamics', credits: 3, prerequisite: ['ENGG201'] },
+        { id: 'ENGG349', name: 'Engineering Mechanics - Dynamics', credits: 3, prerequisite: ['ENGG202'] },
+        { id: 'ENGG407', name: 'Engineering Economics and Project Management', credits: 3, prerequisite: [] },
+        { id: 'CHEM201', name: 'General Chemistry: Structure and Bonding', credits: 3, prerequisite: ['CHEM30'] },
+        { id: 'CHEM203', name: 'General Chemistry: Introduction to Chemical Reactivity', credits: 3, prerequisite: ['CHEM201'] },
+        { id: 'CHEM351', name: 'Organic Chemistry I', credits: 3, prerequisite: ['CHEM203'] },
+        { id: 'CHEM353', name: 'Organic Chemistry II', credits: 3, prerequisite: ['CHEM351'] },
+        { id: 'BIOL241', name: 'Genetics', credits: 3, prerequisite: ['BIOL30'] },
+        { id: 'BIOL311', name: 'Evolution', credits: 3, prerequisite: ['BIOL241'] },
+        { id: 'BIOL331', name: 'Molecular Biology', credits: 3, prerequisite: ['BIOL241', 'CHEM203'] },
+        { id: 'PSYC200', name: 'Principles of Psychology', credits: 3, prerequisite: [] },
+        { id: 'PSYC203', name: 'Introduction to Research Methods in Psychology', credits: 3, prerequisite: ['PSYC200'] },
+        { id: 'PSYC312', name: 'Cognitive Psychology', credits: 3, prerequisite: ['PSYC200'] },
+        { id: 'PSYC323', name: 'Developmental Psychology', credits: 3, prerequisite: ['PSYC200'] },
+        { id: 'PSYC342', name: 'Abnormal Psychology', credits: 3, prerequisite: ['PSYC200'] },
+        { id: 'ECON201', name: 'Introduction to Microeconomics', credits: 3, prerequisite: [] },
+        { id: 'ECON203', name: 'Introduction to Macroeconomics', credits: 3, prerequisite: [] },
+        { id: 'ECON301', name: 'Intermediate Microeconomic Theory', credits: 3, prerequisite: ['ECON201'] },
+        { id: 'ECON303', name: 'Intermediate Macroeconomic Theory', credits: 3, prerequisite: ['ECON203'] },
+        { id: 'ECON357', name: 'Introduction to Econometrics', credits: 3, prerequisite: ['ECON201', 'ECON203', 'MATH249'] },
+        { id: 'ENGL251', name: 'Introduction to Literary Studies', credits: 3, prerequisite: [] },
+        { id: 'ENGL255', name: 'Introduction to Drama', credits: 3, prerequisite: [] },
+        { id: 'ENGL265', name: 'Introduction to Poetry', credits: 3, prerequisite: [] },
+        { id: 'ENGL393', name: 'Shakespeare', credits: 3, prerequisite: ['ENGL251'] },
+        { id: 'HIST201', name: 'Introduction to Canadian History', credits: 3, prerequisite: [] },
+        { id: 'HIST203', name: 'Introduction to European History', credits: 3, prerequisite: [] },
+        { id: 'HIST301', name: 'History of Canada to 1867', credits: 3, prerequisite: ['HIST201'] },
+        { id: 'HIST303', name: 'History of Canada Since 1867', credits: 3, prerequisite: ['HIST201'] },
+        { id: 'PHIL315', name: 'Political Philosophy', credits: 3, prerequisite: ['PHIL279'] },
+        { id: 'PHIL317', name: 'Philosophy of Science', credits: 3, prerequisite: ['PHIL279'] },
+        { id: 'SOCI201', name: 'Introduction to Sociology', credits: 3, prerequisite: [] },
+        { id: 'SOCI301', name: 'Classical Sociological Theory', credits: 3, prerequisite: ['SOCI201'] },
+        { id: 'SOCI303', name: 'Contemporary Sociological Theory', credits: 3, prerequisite: ['SOCI201'] },
+        { id: 'SOCI331', name: 'Sociology of the Family', credits: 3, prerequisite: ['SOCI201'] },
+        { id: 'SOCI345', name: 'Sociology of Gender', credits: 3, prerequisite: ['SOCI201'] }
     ],
     'Mathematics': [
         { id: 'MATH211', name: 'Linear Methods I', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
@@ -43,7 +102,78 @@ const AVAILABLE_COURSES = {
         { id: 'CPSC217', name: 'Introduction to Computer Science for Multidisciplinary Studies', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
         { id: 'STAT321', name: 'Introduction to Probability', credits: 3, prerequisite: ['MATH267'], defaultTerm: 'Fall', defaultYear: 2 },
         { id: 'STAT323', name: 'Introduction to Statistical Inference', credits: 3, prerequisite: ['STAT321'], defaultTerm: 'Winter', defaultYear: 2 },
-        { id: 'STAT517', name: 'Statistical Project', credits: 3, prerequisite: [], defaultTerm: 'Winter', defaultYear: 4 }
+        { id: 'STAT517', name: 'Statistical Project', credits: 3, prerequisite: [], defaultTerm: 'Winter', defaultYear: 4 },
+        { id: 'CPSC235', name: 'Introduction to Computer Science for Computer Science Majors II', credits: 3, prerequisite: ['CPSC233'] },
+        { id: 'CPSC313', name: 'Introduction to Computability', credits: 3, prerequisite: ['CPSC235', 'MATH271'] },
+        { id: 'CPSC319', name: 'Data Structures, Algorithms, and Their Applications', credits: 3, prerequisite: ['CPSC231', 'MATH271'] },
+        { id: 'CPSC329', name: 'Explorations in Information Security and Privacy', credits: 3, prerequisite: ['CPSC231'] },
+        { id: 'CPSC359', name: 'Computing Machinery II', credits: 3, prerequisite: ['CPSC355'] },
+        { id: 'CPSC418', name: 'Introduction to Cryptography', credits: 3, prerequisite: ['CPSC319', 'MATH271'] },
+        { id: 'CPSC441', name: 'Computer Networks', credits: 3, prerequisite: ['CPSC319'] },
+        { id: 'CPSC481', name: 'Human-Computer Interaction I', credits: 3, prerequisite: ['CPSC319'] },
+        { id: 'CPSC501', name: 'Advanced Programming Techniques', credits: 3, prerequisite: ['CPSC319'] },
+        { id: 'CPSC525', name: 'Principles of Computer Security', credits: 3, prerequisite: ['CPSC329'] },
+        { id: 'CPSC526', name: 'Network Systems Security', credits: 3, prerequisite: ['CPSC329'] },
+        { id: 'CPSC531', name: 'Systems Modelling and Simulation', credits: 3, prerequisite: ['CPSC319'] },
+        { id: 'CPSC535', name: 'Introduction to Image Processing and Computer Vision', credits: 3, prerequisite: ['CPSC319'] },
+        { id: 'CPSC567', name: 'Foundations of Multi-Agent Systems', credits: 3, prerequisite: ['CPSC319'] },
+        { id: 'PHYS211', name: 'Mechanics', credits: 3, prerequisite: ['PHYS30', 'MATH31'] },
+        { id: 'PHYS221', name: 'Electricity and Magnetism', credits: 3, prerequisite: ['PHYS211', 'MATH211'] },
+        { id: 'PHYS341', name: 'Classical Mechanics I', credits: 3, prerequisite: ['PHYS211', 'MATH211'] },
+        { id: 'ENGG201', name: 'Behaviour of Liquids, Gases and Solids', credits: 3, prerequisite: ['PHYS30', 'MATH31'] },
+        { id: 'ENGG202', name: 'Engineering Statics', credits: 3, prerequisite: ['PHYS30', 'MATH31'] },
+        { id: 'ENGG225', name: 'Fundamentals of Electrical Circuits and Machines', credits: 3, prerequisite: ['PHYS30', 'MATH31'] },
+        { id: 'ENGG233', name: 'Engineering Principles and Professionalism', credits: 3, prerequisite: [] },
+        { id: 'ENGG311', name: 'Engineering Thermodynamics', credits: 3, prerequisite: ['ENGG201'] },
+        { id: 'ENGG349', name: 'Engineering Mechanics - Dynamics', credits: 3, prerequisite: ['ENGG202'] },
+        { id: 'ENGG407', name: 'Engineering Economics and Project Management', credits: 3, prerequisite: [] },
+        { id: 'CHEM201', name: 'General Chemistry: Structure and Bonding', credits: 3, prerequisite: ['CHEM30'] },
+        { id: 'CHEM203', name: 'General Chemistry: Introduction to Chemical Reactivity', credits: 3, prerequisite: ['CHEM201'] },
+        { id: 'CHEM351', name: 'Organic Chemistry I', credits: 3, prerequisite: ['CHEM203'] },
+        { id: 'CHEM353', name: 'Organic Chemistry II', credits: 3, prerequisite: ['CHEM351'] },
+        { id: 'BIOL241', name: 'Genetics', credits: 3, prerequisite: ['BIOL30'] },
+        { id: 'BIOL311', name: 'Evolution', credits: 3, prerequisite: ['BIOL241'] },
+        { id: 'BIOL331', name: 'Molecular Biology', credits: 3, prerequisite: ['BIOL241', 'CHEM203'] },
+        { id: 'PSYC200', name: 'Principles of Psychology', credits: 3, prerequisite: [] },
+        { id: 'PSYC203', name: 'Introduction to Research Methods in Psychology', credits: 3, prerequisite: ['PSYC200'] },
+        { id: 'PSYC312', name: 'Cognitive Psychology', credits: 3, prerequisite: ['PSYC200'] },
+        { id: 'PSYC323', name: 'Developmental Psychology', credits: 3, prerequisite: ['PSYC200'] },
+        { id: 'PSYC342', name: 'Abnormal Psychology', credits: 3, prerequisite: ['PSYC200'] },
+        { id: 'ECON201', name: 'Introduction to Microeconomics', credits: 3, prerequisite: [] },
+        { id: 'ECON203', name: 'Introduction to Macroeconomics', credits: 3, prerequisite: [] },
+        { id: 'ECON301', name: 'Intermediate Microeconomic Theory', credits: 3, prerequisite: ['ECON201'] },
+        { id: 'ECON303', name: 'Intermediate Macroeconomic Theory', credits: 3, prerequisite: ['ECON203'] },
+        { id: 'ECON357', name: 'Introduction to Econometrics', credits: 3, prerequisite: ['ECON201', 'ECON203', 'MATH249'] },
+        { id: 'ENGL251', name: 'Introduction to Literary Studies', credits: 3, prerequisite: [] },
+        { id: 'ENGL255', name: 'Introduction to Drama', credits: 3, prerequisite: [] },
+        { id: 'ENGL265', name: 'Introduction to Poetry', credits: 3, prerequisite: [] },
+        { id: 'ENGL393', name: 'Shakespeare', credits: 3, prerequisite: ['ENGL251'] },
+        { id: 'HIST201', name: 'Introduction to Canadian History', credits: 3, prerequisite: [] },
+        { id: 'HIST203', name: 'Introduction to European History', credits: 3, prerequisite: [] },
+        { id: 'HIST301', name: 'History of Canada to 1867', credits: 3, prerequisite: ['HIST201'] },
+        { id: 'HIST303', name: 'History of Canada Since 1867', credits: 3, prerequisite: ['HIST201'] },
+        { id: 'PHIL315', name: 'Political Philosophy', credits: 3, prerequisite: ['PHIL279'] },
+        { id: 'PHIL317', name: 'Philosophy of Science', credits: 3, prerequisite: ['PHIL279'] },
+        { id: 'SOCI201', name: 'Introduction to Sociology', credits: 3, prerequisite: [] },
+        { id: 'SOCI301', name: 'Classical Sociological Theory', credits: 3, prerequisite: ['SOCI201'] },
+        { id: 'SOCI303', name: 'Contemporary Sociological Theory', credits: 3, prerequisite: ['SOCI201'] },
+        { id: 'SOCI331', name: 'Sociology of the Family', credits: 3, prerequisite: ['SOCI201'] },
+        { id: 'SOCI345', name: 'Sociology of Gender', credits: 3, prerequisite: ['SOCI201'] },
+        { id: 'ARHI201', name: 'Introduction to Art History', credits: 3, prerequisite: [] },
+        { id: 'ARHI301', name: 'Renaissance Art', credits: 3, prerequisite: ['ARHI201'] },
+        { id: 'ARHI303', name: 'Modern Art', credits: 3, prerequisite: ['ARHI201'] },
+        { id: 'MUSI201', name: 'Introduction to Music Theory', credits: 3, prerequisite: [] },
+        { id: 'MUSI301', name: 'Music History I', credits: 3, prerequisite: ['MUSI201'] },
+        { id: 'MUSI303', name: 'Music History II', credits: 3, prerequisite: ['MUSI201'] },
+        { id: 'GEOG201', name: 'Introduction to Physical Geography', credits: 3, prerequisite: [] },
+        { id: 'GEOG301', name: 'Climate Change and the Environment', credits: 3, prerequisite: ['GEOG201'] },
+        { id: 'GEOG303', name: 'Urban Geography', credits: 3, prerequisite: ['GEOG201'] },
+        { id: 'ANTH201', name: 'Introduction to Anthropology', credits: 3, prerequisite: [] },
+        { id: 'ANTH301', name: 'Cultural Anthropology', credits: 3, prerequisite: ['ANTH201'] },
+        { id: 'ANTH303', name: 'Archaeology', credits: 3, prerequisite: ['ANTH201'] },
+        { id: 'LING201', name: 'Introduction to Linguistics', credits: 3, prerequisite: [] },
+        { id: 'LING301', name: 'Syntax and Semantics', credits: 3, prerequisite: ['LING201'] },
+        { id: 'LING303', name: 'Phonetics and Phonology', credits: 3, prerequisite: ['LING201'] }
     ],
     'Physics': [
         { id: 'PHYS227', name: 'Classical Physics', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
@@ -79,7 +209,85 @@ const AVAILABLE_COURSES = {
         { id: 'CHEM201', name: 'General Chemistry I', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
         { id: 'BIOL211', name: 'Principles of Cellular Biology', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
         { id: 'CPSC217', name: 'Introduction to Computer Science for Multidisciplinary Studies', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
-        { id: 'DATA211', name: 'Introduction to Data Science', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 }
+        { id: 'DATA211', name: 'Introduction to Data Science', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
+        { id: 'CPSC235', name: 'Introduction to Computer Science for Computer Science Majors II', credits: 3, prerequisite: ['CPSC233'] },
+        { id: 'CPSC313', name: 'Introduction to Computability', credits: 3, prerequisite: ['CPSC235', 'MATH271'] },
+        { id: 'CPSC319', name: 'Data Structures, Algorithms, and Their Applications', credits: 3, prerequisite: ['CPSC231', 'MATH271'] },
+        { id: 'CPSC329', name: 'Explorations in Information Security and Privacy', credits: 3, prerequisite: ['CPSC231'] },
+        { id: 'CPSC359', name: 'Computing Machinery II', credits: 3, prerequisite: ['CPSC355'] },
+        { id: 'CPSC418', name: 'Introduction to Cryptography', credits: 3, prerequisite: ['CPSC319', 'MATH271'] },
+        { id: 'CPSC441', name: 'Computer Networks', credits: 3, prerequisite: ['CPSC319'] },
+        { id: 'CPSC481', name: 'Human-Computer Interaction I', credits: 3, prerequisite: ['CPSC319'] },
+        { id: 'CPSC501', name: 'Advanced Programming Techniques', credits: 3, prerequisite: ['CPSC319'] },
+        { id: 'CPSC525', name: 'Principles of Computer Security', credits: 3, prerequisite: ['CPSC329'] },
+        { id: 'CPSC526', name: 'Network Systems Security', credits: 3, prerequisite: ['CPSC329'] },
+        { id: 'CPSC531', name: 'Systems Modelling and Simulation', credits: 3, prerequisite: ['CPSC319'] },
+        { id: 'CPSC535', name: 'Introduction to Image Processing and Computer Vision', credits: 3, prerequisite: ['CPSC319'] },
+        { id: 'CPSC567', name: 'Foundations of Multi-Agent Systems', credits: 3, prerequisite: ['CPSC319'] },
+        { id: 'ENGG201', name: 'Behaviour of Liquids, Gases and Solids', credits: 3, prerequisite: ['PHYS30', 'MATH31'] },
+        { id: 'ENGG202', name: 'Engineering Statics', credits: 3, prerequisite: ['PHYS30', 'MATH31'] },
+        { id: 'ENGG225', name: 'Fundamentals of Electrical Circuits and Machines', credits: 3, prerequisite: ['PHYS30', 'MATH31'] },
+        { id: 'ENGG233', name: 'Engineering Principles and Professionalism', credits: 3, prerequisite: [] },
+        { id: 'ENGG311', name: 'Engineering Thermodynamics', credits: 3, prerequisite: ['ENGG201'] },
+        { id: 'ENGG349', name: 'Engineering Mechanics - Dynamics', credits: 3, prerequisite: ['ENGG202'] },
+        { id: 'ENGG407', name: 'Engineering Economics and Project Management', credits: 3, prerequisite: [] },
+        { id: 'CHEM203', name: 'General Chemistry: Introduction to Chemical Reactivity', credits: 3, prerequisite: ['CHEM201'] },
+        { id: 'CHEM351', name: 'Organic Chemistry I', credits: 3, prerequisite: ['CHEM203'] },
+        { id: 'CHEM353', name: 'Organic Chemistry II', credits: 3, prerequisite: ['CHEM351'] },
+        { id: 'BIOL241', name: 'Genetics', credits: 3, prerequisite: ['BIOL30'] },
+        { id: 'BIOL311', name: 'Evolution', credits: 3, prerequisite: ['BIOL241'] },
+        { id: 'BIOL331', name: 'Molecular Biology', credits: 3, prerequisite: ['BIOL241', 'CHEM203'] },
+        { id: 'PSYC200', name: 'Principles of Psychology', credits: 3, prerequisite: [] },
+        { id: 'PSYC203', name: 'Introduction to Research Methods in Psychology', credits: 3, prerequisite: ['PSYC200'] },
+        { id: 'PSYC312', name: 'Cognitive Psychology', credits: 3, prerequisite: ['PSYC200'] },
+        { id: 'PSYC323', name: 'Developmental Psychology', credits: 3, prerequisite: ['PSYC200'] },
+        { id: 'PSYC342', name: 'Abnormal Psychology', credits: 3, prerequisite: ['PSYC200'] },
+        { id: 'ECON201', name: 'Introduction to Microeconomics', credits: 3, prerequisite: [] },
+        { id: 'ECON203', name: 'Introduction to Macroeconomics', credits: 3, prerequisite: [] },
+        { id: 'ECON301', name: 'Intermediate Microeconomic Theory', credits: 3, prerequisite: ['ECON201'] },
+        { id: 'ECON303', name: 'Intermediate Macroeconomic Theory', credits: 3, prerequisite: ['ECON203'] },
+        { id: 'ECON357', name: 'Introduction to Econometrics', credits: 3, prerequisite: ['ECON201', 'ECON203', 'MATH249'] },
+        { id: 'ENGL251', name: 'Introduction to Literary Studies', credits: 3, prerequisite: [] },
+        { id: 'ENGL255', name: 'Introduction to Drama', credits: 3, prerequisite: [] },
+        { id: 'ENGL265', name: 'Introduction to Poetry', credits: 3, prerequisite: [] },
+        { id: 'ENGL393', name: 'Shakespeare', credits: 3, prerequisite: ['ENGL251'] },
+        { id: 'HIST201', name: 'Introduction to Canadian History', credits: 3, prerequisite: [] },
+        { id: 'HIST203', name: 'Introduction to European History', credits: 3, prerequisite: [] },
+        { id: 'HIST301', name: 'History of Canada to 1867', credits: 3, prerequisite: ['HIST201'] },
+        { id: 'HIST303', name: 'History of Canada Since 1867', credits: 3, prerequisite: ['HIST201'] },
+        { id: 'PHIL315', name: 'Political Philosophy', credits: 3, prerequisite: ['PHIL279'] },
+        { id: 'PHIL317', name: 'Philosophy of Science', credits: 3, prerequisite: ['PHIL279'] },
+        { id: 'SOCI201', name: 'Introduction to Sociology', credits: 3, prerequisite: [] },
+        { id: 'SOCI301', name: 'Classical Sociological Theory', credits: 3, prerequisite: ['SOCI201'] },
+        { id: 'SOCI303', name: 'Contemporary Sociological Theory', credits: 3, prerequisite: ['SOCI201'] },
+        { id: 'SOCI331', name: 'Sociology of the Family', credits: 3, prerequisite: ['SOCI201'] },
+        { id: 'SOCI345', name: 'Sociology of Gender', credits: 3, prerequisite: ['SOCI201'] },
+        { id: 'ARHI201', name: 'Introduction to Art History', credits: 3, prerequisite: [] },
+        { id: 'ARHI301', name: 'Renaissance Art', credits: 3, prerequisite: ['ARHI201'] },
+        { id: 'ARHI303', name: 'Modern Art', credits: 3, prerequisite: ['ARHI201'] },
+        { id: 'MUSI201', name: 'Introduction to Music Theory', credits: 3, prerequisite: [] },
+        { id: 'MUSI301', name: 'Music History I', credits: 3, prerequisite: ['MUSI201'] },
+        { id: 'MUSI303', name: 'Music History II', credits: 3, prerequisite: ['MUSI201'] },
+        { id: 'GEOG201', name: 'Introduction to Physical Geography', credits: 3, prerequisite: [] },
+        { id: 'GEOG301', name: 'Climate Change and the Environment', credits: 3, prerequisite: ['GEOG201'] },
+        { id: 'GEOG303', name: 'Urban Geography', credits: 3, prerequisite: ['GEOG201'] },
+        { id: 'ANTH201', name: 'Introduction to Anthropology', credits: 3, prerequisite: [] },
+        { id: 'ANTH301', name: 'Cultural Anthropology', credits: 3, prerequisite: ['ANTH201'] },
+        { id: 'ANTH303', name: 'Archaeology', credits: 3, prerequisite: ['ANTH201'] },
+        { id: 'LING201', name: 'Introduction to Linguistics', credits: 3, prerequisite: [] },
+        { id: 'LING301', name: 'Syntax and Semantics', credits: 3, prerequisite: ['LING201'] },
+        { id: 'LING303', name: 'Phonetics and Phonology', credits: 3, prerequisite: ['LING201'] },
+        { id: 'DATA301', name: 'Data Visualization', credits: 3, prerequisite: ['DATA211'] },
+        { id: 'DATA311', name: 'Machine Learning for Data Science', credits: 3, prerequisite: ['DATA211'] },
+        { id: 'DATA321', name: 'Big Data Analytics', credits: 3, prerequisite: ['DATA211'] },
+        { id: 'DATA331', name: 'Data Mining', credits: 3, prerequisite: ['DATA211'] },
+        { id: 'DATA341', name: 'Natural Language Processing', credits: 3, prerequisite: ['DATA211'] },
+        { id: 'DATA351', name: 'Data Ethics and Privacy', credits: 3, prerequisite: ['DATA211'] },
+        { id: 'ENVS201', name: 'Introduction to Environmental Science', credits: 3, prerequisite: [] },
+        { id: 'ENVS301', name: 'Environmental Policy and Management', credits: 3, prerequisite: ['ENVS201'] },
+        { id: 'ENVS303', name: 'Climate Change Science', credits: 3, prerequisite: ['ENVS201'] },
+        { id: 'ENVS305', name: 'Sustainable Development', credits: 3, prerequisite: ['ENVS201'] },
+        { id: 'ENVS307', name: 'Environmental Impact Assessment', credits: 3, prerequisite: ['ENVS201'] }
     ]
 };
 
@@ -284,7 +492,8 @@ function createCourseCard(course) {
         e.dataTransfer.setData('text/plain', course.id);
     };
 
-    const dPlusWarning = ['D+', 'D', 'F'].includes(course.grade) && course.prerequisite.length > 0 ?
+    // Show a warning if the course has prerequisites and has been given a D/D+ grade
+    const dPlusWarning = ['D+', 'D'].includes(course.grade) && course.prerequisite.length > 0 ?
     `<div style="color: #dc2626; font-size: 0.875rem; margin-top: 0.5rem;">
         Warning: ${course.grade} grade cannot be used as a prerequisite.
     </div>` : '';
@@ -340,9 +549,9 @@ function updateGrade(id, grade) {
     if ((grade === 'D+' || grade === 'D') && 
         !(course.grade === 'D+' || course.grade === 'D') && 
         countDPlusGrades() >= maxDPlusAllowed) {
-        alert(`You have already used the maximum allowed D/D+ grades (${maxDPlusAllowed}).`);
-        return;
+        alert(`You have reached the maximum allowed D/D+ grades (${maxDPlusAllowed}). This course will not count towards your degree.`);
     }
+
     
     courses = courses.map(course => 
         course.id === id ? { ...course, grade } : course
@@ -355,12 +564,19 @@ function updateGrade(id, grade) {
         );
     }
 
-    // Update required courses if the grade-updated course is a required one
+    // Show a warning if the course has prerequisites and is a required course with a D/D+ grade
     const major = document.getElementById('major-select').value;
+    if (MAJOR_REQUIREMENTS[major].includes(id) && (grade === 'D+' || grade === 'D')) {
+        alert(`Warning: ${course.id} (${course.name}) has prerequisites and is a required course. A grade of ${grade} cannot be used as a prerequisite.`);
+    }
+
+    // Update required courses if the grade-updated course is a required one
     if (MAJOR_REQUIREMENTS[major].includes(id)) {
         renderRequiredCourses();
     }
-    
+
+    // Update the D+ counter and re-render the courses
+    updateDPlusCounter();
     renderCourses();
 }
 
