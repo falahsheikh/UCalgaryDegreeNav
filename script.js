@@ -605,7 +605,7 @@ function updateCreditCounter() {
     creditCounter.style.borderWidth = '2px';
     creditCounter.style.borderStyle = 'solid';
     creditCounter.style.borderColor = '#ffffff #808080 #808080 #ffffff';
-    creditCounter.style.backgroundColor = '#d4d0c8'; // Classic Windows gray
+    creditCounter.style.backgroundColor = '#d4d0c8'; 
 
     creditCounter.style.marginLeft = '30%';
     
@@ -852,6 +852,48 @@ function addYear() {
     }, 100);
 }
 
+function deleteYear() {
+    const years = [...new Set(courses.map(course => course.year))];
+    const maxYear = years.length > 0 ? Math.max(...years) : 4;
+    
+    // Don't allow deleting years 1-4
+    if (maxYear <= 4) {
+        alert("Cannot delete Years 1-4 as they are required by default.");
+        return;
+    }
+    
+    // Check if the year has courses
+    const yearCourses = courses.filter(course => course.year === maxYear);
+    if (yearCourses.length > 0) {
+        const confirmDelete = confirm(`Year ${maxYear} contains ${yearCourses.length} course(s). Deleting this year will remove all courses in it. Are you sure you want to proceed?`);
+        if (!confirmDelete) {
+            return;
+        }
+        
+        // Remove the courses from this year
+        courses = courses.filter(course => course.year !== maxYear);
+    } else {
+        const confirmDelete = confirm(`Are you sure you want to delete Year ${maxYear}?`);
+        if (!confirmDelete) {
+            return;
+        }
+    }
+    
+    // Remove the year option from the year filter dropdown
+    const yearFilter = document.getElementById('year-filter');
+    const yearOption = Array.from(yearFilter.options).find(option => option.value == maxYear);
+    if (yearOption) {
+        yearFilter.removeChild(yearOption);
+    }
+    
+    // Update the UI
+    updateRequiredCourses();
+    renderCourses();
+    
+    // Show notification
+    showNotification(`Year ${maxYear} has been deleted successfully!`);
+}
+
 function addCourseToTerm(year, term) {
     const major = document.getElementById('major-select').value;
     
@@ -968,8 +1010,25 @@ function setDPlusLimit() {
         return;
     }
     maxDPlusAllowed = limit;
-    document.getElementById('max-d-plus').textContent = limit;
-    renderCourses();
+
+    // Update the D/D+ counter
+    updateDPlusCounter();
+
+    // Update course cards with D/D+ grades
+    const courseCards = document.querySelectorAll('.course-card');
+    courseCards.forEach(card => {
+        const courseId = card.dataset.id;
+        const course = courses.find(c => c.id === courseId);
+        if (course && (course.grade === 'D' || course.grade === 'D+')) {
+            const warningDiv = card.querySelector('.d-plus-warning');
+            if (warningDiv) {
+                warningDiv.textContent = `Warning: ${course.grade} grade cannot be used as a prerequisite.`;
+            }
+        }
+    });
+
+    // Show a confirmation message
+    showNotification(`D/D+ limit updated to ${limit}.`);
 }
 
 function generateSharableLink() {
@@ -1538,6 +1597,7 @@ function updatePrerequisiteFlowChart() {
         </div>
     `;
 }
+
 
 // Event listeners
 document.getElementById('search').addEventListener('input', renderCourses);
