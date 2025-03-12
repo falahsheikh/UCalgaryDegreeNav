@@ -544,7 +544,8 @@ function toggleCompletion(id) {
 
 function updateGrade(id, grade) {
     const course = courses.find(c => c.id === id);
-    
+    const major = document.getElementById('major-select').value;
+
     // If changing from a non-D/D+ grade to a D/D+ grade
     if ((grade === 'D+' || grade === 'D') && 
         !(course.grade === 'D+' || course.grade === 'D') && 
@@ -552,7 +553,7 @@ function updateGrade(id, grade) {
         alert(`You have reached the maximum allowed D/D+ grades (${maxDPlusAllowed}). This course will not count towards your degree.`);
     }
 
-    
+    // Update the course grade
     courses = courses.map(course => 
         course.id === id ? { ...course, grade } : course
     );
@@ -565,9 +566,11 @@ function updateGrade(id, grade) {
     }
 
     // Show a warning if the course has prerequisites and is a required course with a D/D+ grade
-    const major = document.getElementById('major-select').value;
     if (MAJOR_REQUIREMENTS[major].includes(id) && (grade === 'D+' || grade === 'D')) {
-        alert(`Warning: ${course.id} (${course.name}) has prerequisites and is a required course. A grade of ${grade} cannot be used as a prerequisite.`);
+        const hasPrerequisites = course.prerequisite && course.prerequisite.length > 0;
+        if (hasPrerequisites) {
+            alert(`Warning: ${course.id} (${course.name}) has prerequisites and is a required course. A grade of ${grade} cannot be used as a prerequisite.`);
+        }
     }
 
     // Update required courses if the grade-updated course is a required one
