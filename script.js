@@ -525,7 +525,52 @@ function createCourseCard(course) {
         </div>
     `;
 
+    // Add hover event listener to show the course's color and label
+    card.addEventListener('mousemove', (e) => showCourseColorLabel(e, statusClass));
+    card.addEventListener('mouseleave', () => hideCourseColorLabel());
+
     return card;
+}
+
+function showCourseColorLabel(e, statusClass) {
+    // Create the color label if it doesn't exist
+    let colorLabel = document.querySelector('.course-color-label');
+    if (!colorLabel) {
+        colorLabel = document.createElement('div');
+        colorLabel.className = 'course-color-label';
+        document.body.appendChild(colorLabel);
+    }
+
+    // Set the color and label based on the course's status
+    const colorMap = {
+        'in-progress': { color: '#fef9c3', label: 'In Progress' }, // Yellow for in-progress
+        'completed': { color: '#dcfce7', label: 'Completed' },     // Green for completed
+        'failed': { color: '#fee2e2', label: 'Failed' },           // Red for failed
+        'requirement-not-met': { color: '#ffedd5', label: 'Requirement Not Met' } // Grey for requirement not met
+    };
+    const { color, label } = colorMap[statusClass];
+
+    // Update the color label content
+    colorLabel.innerHTML = `
+        <div class="color-box" style="background-color: ${color};"></div>
+        <span>${label}</span>
+    `;
+
+    // Position the color label next to the cursor
+    const offset = 10; // Distance from the cursor
+    colorLabel.style.position = 'fixed';
+    colorLabel.style.top = `${e.clientY + offset}px`;
+    colorLabel.style.left = `${e.clientX + offset}px`;
+    colorLabel.style.display = 'flex';
+    colorLabel.style.alignItems = 'center';
+    colorLabel.style.gap = '8px';
+}
+
+function hideCourseColorLabel() {
+    const colorLabel = document.querySelector('.course-color-label');
+    if (colorLabel) {
+        colorLabel.style.display = 'none';
+    }
 }
 
 function toggleCompletion(id) {

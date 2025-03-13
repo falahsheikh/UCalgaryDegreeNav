@@ -59,11 +59,12 @@
             <!-- Year Sections -->
             <div id="year-sections"></div>
 
-            <!-- Add Year Button -->
+            <!-- Add Year Button --> 
             <div class="add-year-button" id="add-year-button">
                 <button onclick="addYear()">Add Year</button>
                 <button onclick="deleteYear()">Delete Year</button>
             </div>
+            
 
             <!-- GPA Charts/Graphs -->
             <div class="graphs-container">
@@ -116,38 +117,18 @@
                 </div>
             </div>
 
-            <!-- Color Legend -->
-            <div class="color-legend">
-                <h3>Color Legend</h3>
-                <div class="color-legend-item in-progress">
-                    <div></div>
-                    <span>In Progress</span>
-                </div>
-                <div class="color-legend-item completed">
-                    <div></div>
-                    <span>Completed</span>
-                </div>
-                <div class="color-legend-item failed">
-                    <div></div>
-                    <span>Failed</span>
-                </div>
-                <div class="color-legend-item requirement-not-met">
-                    <div></div>
-                    <span>Requirement Not Met</span>
+            <!-- Generate Sharable Link & Set D/D+ Limit  -->
+            <div style="margin-top: 2rem; display: flex; align-items: center; justify-content: space-between;">
+                <button onclick="generateSharableLink()" style="height: 38px; margin-bottom: 3px;">Generate Sharable Link</button>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <label for="d-plus-limit">Set Maximum D/D+ Grades Allowed:</label>
+                    <input type="number" id="d-plus-limit" min="0" value="2" 
+                        style="width: 4rem; padding: 0.5rem; font-size: 1rem; 
+                        border: 1px solid #ccc; border-radius: 4px; text-align: center;">
+                    <button onclick="setDPlusLimit()"  style="height: 38px; margin-bottom: 3px;">Set Limit</button>
                 </div>
             </div>
-
-            <!-- Set D/D+ Limit -->
-            <div style="margin-top: 1rem; text-align: right;">
-                <label for="d-plus-limit">Set Maximum D/D+ Grades Allowed:</label>
-                <input type="number" id="d-plus-limit" min="0" value="2" style="width: 4rem; padding: 0.5rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px;">
-                <button onclick="setDPlusLimit()">Set Limit</button>
-            </div>
-
-            <!-- Generate Sharable Link (saves state) -->
-            <div style="margin-top: 2rem;">
-                <button onclick="generateSharableLink()">Generate Sharable Link</button>
-            </div>
+                       
         </div>
     </div>
 </body>
