@@ -81,7 +81,9 @@ const AVAILABLE_COURSES = {
         { id: 'SOCI301', name: 'Classical Sociological Theory', credits: 3, prerequisite: ['SOCI201'] },
         { id: 'SOCI303', name: 'Contemporary Sociological Theory', credits: 3, prerequisite: ['SOCI201'] },
         { id: 'SOCI331', name: 'Sociology of the Family', credits: 3, prerequisite: ['SOCI201'] },
-        { id: 'SOCI345', name: 'Sociology of Gender', credits: 3, prerequisite: ['SOCI201'] }
+        { id: 'SOCI345', name: 'Sociology of Gender', credits: 3, prerequisite: ['SOCI201'] },
+        { id: 'COOP', name: 'Co-op Work Term', credits: 0, prerequisite: [], defaultTerm: 'Summer', defaultYear: 2 },
+        { id: 'BREAK', name: 'Break Term', credits: 0, prerequisite: [], defaultTerm: 'Summer', defaultYear: 3 }
     ],
     'Mathematics': [
         { id: 'MATH211', name: 'Linear Methods I', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
@@ -173,7 +175,9 @@ const AVAILABLE_COURSES = {
         { id: 'ANTH303', name: 'Archaeology', credits: 3, prerequisite: ['ANTH201'] },
         { id: 'LING201', name: 'Introduction to Linguistics', credits: 3, prerequisite: [] },
         { id: 'LING301', name: 'Syntax and Semantics', credits: 3, prerequisite: ['LING201'] },
-        { id: 'LING303', name: 'Phonetics and Phonology', credits: 3, prerequisite: ['LING201'] }
+        { id: 'LING303', name: 'Phonetics and Phonology', credits: 3, prerequisite: ['LING201'] },
+        { id: 'COOP', name: 'Co-op Work Term', credits: 0, prerequisite: [], defaultTerm: 'Summer', defaultYear: 2 },
+        { id: 'BREAK', name: 'Break Term', credits: 0, prerequisite: [], defaultTerm: 'Summer', defaultYear: 3 }
     ],
     'Physics': [
         { id: 'PHYS227', name: 'Classical Physics', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
@@ -287,7 +291,9 @@ const AVAILABLE_COURSES = {
         { id: 'ENVS301', name: 'Environmental Policy and Management', credits: 3, prerequisite: ['ENVS201'] },
         { id: 'ENVS303', name: 'Climate Change Science', credits: 3, prerequisite: ['ENVS201'] },
         { id: 'ENVS305', name: 'Sustainable Development', credits: 3, prerequisite: ['ENVS201'] },
-        { id: 'ENVS307', name: 'Environmental Impact Assessment', credits: 3, prerequisite: ['ENVS201'] }
+        { id: 'ENVS307', name: 'Environmental Impact Assessment', credits: 3, prerequisite: ['ENVS201'] },
+        { id: 'COOP', name: 'Co-op Work Term', credits: 0, prerequisite: [], defaultTerm: 'Summer', defaultYear: 2 },
+        { id: 'BREAK', name: 'Break Term', credits: 0, prerequisite: [], defaultTerm: 'Summer', defaultYear: 3 }
     ]
 };
 
@@ -476,14 +482,36 @@ function renderCourses() {
 function createCourseCard(course) {
     const card = document.createElement('div');
     let statusClass = '';
-    if (course.completed) {
-        statusClass = PASSING_GRADES.includes(course.grade) ? 'completed' : 'failed';
-    } else if (course.prerequisite.length > 0 && !course.prerequisite.every(prereq => 
-        courses.find(c => c.id === prereq && c.completed && PASSING_GRADES.includes(c.grade)))) {
-        statusClass = 'requirement-not-met';
+    let isGreyedOut = false;
+    let isSpecialCourse = ['COOP', 'BREAK'].includes(course.id);
+
+    // Grey out co-op and break courses
+    if (isSpecialCourse) {
+        statusClass = 'special'; // Use a special class for co-op and break courses
+        isGreyedOut = true;
     } else {
-        statusClass = 'in-progress';
+        // Check if prerequisites are met for non-special courses
+        if (course.prerequisite.length > 0) {
+            const prerequisitesMet = course.prerequisite.every(prereq => {
+                const prereqCourse = courses.find(c => c.id === prereq);
+                return prereqCourse && prereqCourse.completed && PASSING_GRADES.includes(prereqCourse.grade);
+            });
+
+            if (!prerequisitesMet) {
+                statusClass = 'requirement-not-met';
+                isGreyedOut = true;
+            } else if (course.completed) {
+                statusClass = PASSING_GRADES.includes(course.grade) ? 'completed' : 'failed';
+            } else {
+                statusClass = 'in-progress';
+            }
+        } else if (course.completed) {
+            statusClass = PASSING_GRADES.includes(course.grade) ? 'completed' : 'failed';
+        } else {
+            statusClass = 'in-progress';
+        }
     }
+
     card.className = `course-card ${statusClass}`;
     card.draggable = true;
     card.dataset.id = course.id;
@@ -493,10 +521,14 @@ function createCourseCard(course) {
     };
 
     // Show a warning if the course has prerequisites and has been given a D/D+ grade
-    const dPlusWarning = ['D+', 'D'].includes(course.grade) && course.prerequisite.length > 0 ?
-    `<div style="color: #dc2626; font-size: 0.875rem; margin-top: 0.5rem;">
-        Warning: ${course.grade} grade cannot be used as a prerequisite.
-    </div>` : '';
+    const dPlusWarning = ['D+', 'D'].includes(course.grade) && course.prerequisite.length > 0 && !isSpecialCourse ?
+        `<div style="color: #dc2626; font-size: 0.875rem; margin-top: 0.5rem;">
+            Warning: ${course.grade} grade cannot be used as a prerequisite.
+        </div>` : '';
+
+    // Check if the course is required
+    const major = document.getElementById('major-select').value;
+    const isRequired = MAJOR_REQUIREMENTS[major].includes(course.id);
 
     card.innerHTML = `
         <div class="course-header">
@@ -506,33 +538,44 @@ function createCourseCard(course) {
             </div>
             <span class="badge">${course.credits} Credits</span>
         </div>
-        ${course.prerequisite.length ? `
+        ${course.prerequisite.length && !isSpecialCourse ? `
             <div style="color: #6b7280; font-size: 0.875rem; margin-top: 0.5rem;">
                 Prerequisites: ${course.prerequisite.join(', ')}
             </div>
         ` : ''}
         ${dPlusWarning}
         <div class="course-actions">
-            <button onclick="toggleCompletion('${course.id}')">
-                ${course.completed ? 'Completed' : 'Mark Complete'}
-            </button>
-            ${course.completed ? `
+            ${!isGreyedOut && !isSpecialCourse ? `
+                <button onclick="toggleCompletion('${course.id}')">
+                    ${course.completed ? 'Completed' : 'Mark Complete'}
+                </button>
+            ` : ''}
+            ${course.completed && !isGreyedOut && !isSpecialCourse ? `
                 <input type="text" class="grade-input" placeholder="Grade" 
                     value="${course.grade || ''}" 
                     onchange="updateGrade('${course.id}', this.value)">
             ` : ''}
-            <button onclick="deleteCourse('${course.id}')">Delete</button>
+            ${!isRequired ? `
+                <button onclick="deleteCourse('${course.id}')">Delete</button>
+            ` : ''}
         </div>
     `;
 
     // Add hover event listener to show the course's color and label
-    card.addEventListener('mousemove', (e) => showCourseColorLabel(e, statusClass));
-    card.addEventListener('mouseleave', () => hideCourseColorLabel());
+    if (!isSpecialCourse) {
+        card.addEventListener('mousemove', (e) => showCourseColorLabel(e, statusClass));
+        card.addEventListener('mouseleave', () => hideCourseColorLabel());
+    }
 
     return card;
 }
 
 function showCourseColorLabel(e, statusClass) {
+    // Skip if the course is a special course (co-op or break)
+    if (statusClass === 'special') {
+        return;
+    }
+
     // Create the color label if it doesn't exist
     let colorLabel = document.querySelector('.course-color-label');
     if (!colorLabel) {
@@ -542,13 +585,14 @@ function showCourseColorLabel(e, statusClass) {
     }
 
     // Set the color and label based on the course's status
-    const colorMap = {
-        'in-progress': { color: '#fef9c3', label: 'In Progress' }, // Yellow for in-progress
-        'completed': { color: '#dcfce7', label: 'Completed' },     // Green for completed
-        'failed': { color: '#fee2e2', label: 'Failed' },           // Red for failed
-        'requirement-not-met': { color: '#ffedd5', label: 'Requirement Not Met' } // Grey for requirement not met
-    };
-    const { color, label } = colorMap[statusClass];
+const colorMap = {
+    'in-progress': { color: '#fef9c3', label: 'In Progress' }, // Yellow for in-progress
+    'completed': { color: '#dcfce7', label: 'Completed' },     // Green for completed
+    'failed': { color: '#fee2e2', label: 'Failed' },           // Red for failed
+    'requirement-not-met': { color: '#ffedd5', label: 'Requirement Not Met' }, // Grey for requirement not met
+    'special': { color: '#d3d3d3', label: 'Co-op/Break' }      // Grey for co-op and break courses
+};
+    const { color, label } = colorMap[statusClass] || colorMap['special'];
 
     // Update the color label content
     colorLabel.innerHTML = `
@@ -574,16 +618,22 @@ function hideCourseColorLabel() {
 }
 
 function toggleCompletion(id) {
+    const course = courses.find(c => c.id === id);
+    if (['COOP', 'BREAK'].includes(course.id)) {
+        alert("Co-op and Break courses cannot be marked as completed.");
+        return;
+    }
+
     courses = courses.map(course => 
         course.id === id ? { ...course, completed: !course.completed } : course
     );
-    
+
     // Update required courses if the toggled course is a required one
     const major = document.getElementById('major-select').value;
     if (MAJOR_REQUIREMENTS[major].includes(id)) {
         renderRequiredCourses();
     }
-    
+
     renderCourses();
 }
 
@@ -941,11 +991,16 @@ function deleteYear() {
 
 function addCourseToTerm(year, term) {
     const major = document.getElementById('major-select').value;
-    
+
     // Get all courses from AVAILABLE_COURSES that aren't already in the courses array
-    const availableCourses = AVAILABLE_COURSES[major].filter(course => 
-        !courses.some(c => c.id === course.id)
-    );
+    const availableCourses = AVAILABLE_COURSES[major].filter(course => {
+        // Allow multiple instances of co-op and break courses
+        if (['COOP', 'BREAK'].includes(course.id)) {
+            return true;
+        }
+        // Exclude courses that are already in the courses array
+        return !courses.some(c => c.id === course.id);
+    });
 
     if (availableCourses.length === 0) {
         alert("No available courses to add.");
@@ -955,7 +1010,7 @@ function addCourseToTerm(year, term) {
     // Check if the term container already has a course selection dropdown
     const termContainer = document.querySelector(`.term-container[data-year="${year}"][data-term="${term}"]`);
     const existingDropdown = termContainer.querySelector('.course-selection-container');
-    
+
     if (existingDropdown) {
         // If a dropdown already exists, remove it
         termContainer.removeChild(existingDropdown);
@@ -965,7 +1020,7 @@ function addCourseToTerm(year, term) {
     // Create a container for the dropdown and button
     const selectionContainer = document.createElement('div');
     selectionContainer.className = 'course-selection-container';
-    
+
     const dropdown = document.createElement('select');
     dropdown.className = 'course-dropdown';
     dropdown.innerHTML = `
@@ -977,7 +1032,7 @@ function addCourseToTerm(year, term) {
 
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'selection-buttons';
-    
+
     const confirmButton = document.createElement('button');
     confirmButton.textContent = 'Add';
     confirmButton.className = 'confirm-button';
@@ -995,7 +1050,7 @@ function addCourseToTerm(year, term) {
         }
 
         const isRequired = MAJOR_REQUIREMENTS[major].includes(courseId);
-        
+
         courses.push({
             id: courseId,
             name: course.name,
@@ -1003,18 +1058,18 @@ function addCourseToTerm(year, term) {
             prerequisite: course.prerequisite,
             term,
             year: parseInt(year),
-            completed: false,
+            completed: ['COOP', 'BREAK'].includes(courseId), // Co-op and break courses are marked as completed by default
             grade: null,
             required: isRequired
         });
-        
+
         // Remove the selection container after adding the course
         termContainer.removeChild(selectionContainer);
-        
+
         updateRequiredCourses();
         renderCourses();
     };
-    
+
     const cancelButton = document.createElement('button');
     cancelButton.textContent = 'Cancel';
     cancelButton.className = 'cancel-button';
@@ -1022,23 +1077,23 @@ function addCourseToTerm(year, term) {
         // Remove the selection container when canceled
         termContainer.removeChild(selectionContainer);
     };
-    
+
     buttonContainer.appendChild(confirmButton);
     buttonContainer.appendChild(cancelButton);
-    
+
     selectionContainer.appendChild(dropdown);
     selectionContainer.appendChild(buttonContainer);
-    
+
     termContainer.appendChild(selectionContainer);
 }
 
 function deleteCourse(id) {
     // Remove the course with the specified id
     courses = courses.filter(course => course.id !== id);
-    
+
     // Update the required courses list
     updateRequiredCourses();
-    
+
     // Force a UI refresh
     renderCourses();
 }
