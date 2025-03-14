@@ -461,3 +461,7 @@ canvas {
     background-color: #D1D5DB; 
     transform: scale(0.98); 
 }
+
+.grade-input::placeholder {
+    font-size: 11px;
+}

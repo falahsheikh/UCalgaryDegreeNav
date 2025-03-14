@@ -82,8 +82,8 @@ const AVAILABLE_COURSES = {
         { id: 'SOCI303', name: 'Contemporary Sociological Theory', credits: 3, prerequisite: ['SOCI201'] },
         { id: 'SOCI331', name: 'Sociology of the Family', credits: 3, prerequisite: ['SOCI201'] },
         { id: 'SOCI345', name: 'Sociology of Gender', credits: 3, prerequisite: ['SOCI201'] },
-        { id: 'COOP', name: 'Co-op Work Term', credits: 0, prerequisite: [], defaultTerm: 'Summer', defaultYear: 2 },
-        { id: 'BREAK', name: 'Break Term', credits: 0, prerequisite: [], defaultTerm: 'Summer', defaultYear: 3 }
+        { id: 'COOP', name: 'Co-op Work Term', credits: 0, prerequisite: []},
+        { id: 'BREAK', name: 'Break Term', credits: 0, prerequisite: []}
     ],
     'Mathematics': [
         { id: 'MATH211', name: 'Linear Methods I', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
@@ -176,8 +176,8 @@ const AVAILABLE_COURSES = {
         { id: 'LING201', name: 'Introduction to Linguistics', credits: 3, prerequisite: [] },
         { id: 'LING301', name: 'Syntax and Semantics', credits: 3, prerequisite: ['LING201'] },
         { id: 'LING303', name: 'Phonetics and Phonology', credits: 3, prerequisite: ['LING201'] },
-        { id: 'COOP', name: 'Co-op Work Term', credits: 0, prerequisite: [], defaultTerm: 'Summer', defaultYear: 2 },
-        { id: 'BREAK', name: 'Break Term', credits: 0, prerequisite: [], defaultTerm: 'Summer', defaultYear: 3 }
+        { id: 'COOP', name: 'Co-op Work Term', credits: 0, prerequisite: []},
+        { id: 'BREAK', name: 'Break Term', credits: 0, prerequisite: []}
     ],
     'Physics': [
         { id: 'PHYS227', name: 'Classical Physics', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
@@ -292,8 +292,8 @@ const AVAILABLE_COURSES = {
         { id: 'ENVS303', name: 'Climate Change Science', credits: 3, prerequisite: ['ENVS201'] },
         { id: 'ENVS305', name: 'Sustainable Development', credits: 3, prerequisite: ['ENVS201'] },
         { id: 'ENVS307', name: 'Environmental Impact Assessment', credits: 3, prerequisite: ['ENVS201'] },
-        { id: 'COOP', name: 'Co-op Work Term', credits: 0, prerequisite: [], defaultTerm: 'Summer', defaultYear: 2 },
-        { id: 'BREAK', name: 'Break Term', credits: 0, prerequisite: [], defaultTerm: 'Summer', defaultYear: 3 }
+        { id: 'COOP', name: 'Co-op Work Term', credits: 0, prerequisite: []},
+        { id: 'BREAK', name: 'Break Term', credits: 0, prerequisite: []}
     ]
 };
 
@@ -551,7 +551,7 @@ function createCourseCard(course) {
                 </button>
             ` : ''}
             ${course.completed && !isGreyedOut && !isSpecialCourse ? `
-                <input type="text" class="grade-input" placeholder="Grade" 
+                <input type="text" class="grade-input" placeholder="Letter Grade" 
                     value="${course.grade || ''}" 
                     onchange="updateGrade('${course.id}', this.value)">
             ` : ''}
