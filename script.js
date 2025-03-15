@@ -324,7 +324,6 @@ let gpaChart = null;
 let gpaLineChart = null;
 
 function initializeCoursesForMajor(major) {
-    // Create an array of course objects from AVAILABLE_COURSES
     // Only include courses that have both defaultTerm and defaultYear
     courses = AVAILABLE_COURSES[major]
         .filter(course => course.defaultTerm !== undefined && course.defaultYear !== undefined)
@@ -350,7 +349,7 @@ function updateYearFilterOptions() {
         yearFilter.remove(1);
     }
     
-    // Add options for years 1-4
+    // Options for years 1-4
     for (let i = 1; i <= 4; i++) {
         const yearOption = document.createElement('option');
         yearOption.value = i;
@@ -358,7 +357,7 @@ function updateYearFilterOptions() {
         yearFilter.appendChild(yearOption);
     }
     
-    // Add options for any years beyond 4 that exist in the courses
+    // Options for any years beyond 4 that exist in the courses
     const existingYears = [...new Set(courses.map(course => course.year))];
     existingYears.filter(year => year > 4).forEach(year => {
         const yearOption = document.createElement('option');
@@ -399,7 +398,6 @@ function renderCourses() {
         allYears.forEach(year => {
             const yearCourses = filtered.filter(course => course.year === year);
             
-            // Create section for all years (1-4 by default and any added years)
             const yearSection = document.createElement('div');
             yearSection.className = 'year-section';
             yearSection.innerHTML = `
@@ -561,7 +559,7 @@ function createCourseCard(course) {
         </div>
     `;
 
-    // Add hover event listener to show the course's color and label
+    // Hover event listener to show the course's color and label
     if (!isSpecialCourse) {
         card.addEventListener('mousemove', (e) => showCourseColorLabel(e, statusClass));
         card.addEventListener('mouseleave', () => hideCourseColorLabel());
@@ -695,7 +693,6 @@ function updateCreditCounter() {
     // Set the text
     creditCounter.textContent = `${total}/120 Credits`;
     
-    // Apply old-school button styling
     creditCounter.style.cursor = 'pointer';
     creditCounter.style.borderWidth = '2px';
     creditCounter.style.borderStyle = 'solid';
@@ -704,7 +701,7 @@ function updateCreditCounter() {
 
     creditCounter.style.marginLeft = '30%';
     
-    // Add hover and active states
+    // Hover and active states
     creditCounter.onmouseover = function() {
         this.style.backgroundColor = '#d8d4cc';
     };
@@ -974,7 +971,6 @@ function deleteYear() {
         }
     }
     
-    // Remove the year option from the year filter dropdown
     const yearFilter = document.getElementById('year-filter');
     const yearOption = Array.from(yearFilter.options).find(option => option.value == maxYear);
     if (yearOption) {
