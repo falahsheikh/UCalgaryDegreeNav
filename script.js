@@ -1129,18 +1129,23 @@ function setDPlusLimit() {
 
 function generateSharableLink() {
     const data = {
-        courses: JSON.parse(JSON.stringify(courses)),
+        courses: JSON.parse(JSON.stringify(courses)), // Deep copy to avoid reference issues
         maxDPlusAllowed,
-        requiredCourses: JSON.parse(JSON.stringify(requiredCourses || [])),
+        requiredCourses: JSON.parse(JSON.stringify(requiredCourses || [])), // Deep copy
         major: document.getElementById('major-select')?.value || 'Computer Science'
     };
 
+    // Encode the data to base64
     const encodedData = btoa(JSON.stringify(data));
 
-    // Use window.location.origin and window.location.pathname to handle subpaths
+    // Generate the sharable link
     const link = `${window.location.origin}${window.location.pathname}?data=${encodedData}`;
 
-    console.log("Generated Link:", link); // Log the generated link
+    // Save the current state to detect unsaved changes later
+    window.linkGenerated = true;
+    window.lastSavedState = JSON.stringify(data);
+
+    // Prompt the user with the sharable link
     prompt("Share this link to save your progress:", link);
 }
 
@@ -1148,54 +1153,79 @@ function loadFromSharableLink() {
     const urlParams = new URLSearchParams(window.location.search);
     const data = urlParams.get('data');
 
-    if (!data) {
-        console.log("No data parameter found in URL.");
-        return false;
-    }
+    if (data) {
+        try {
+            // Decode the data from base64
+            const decodedData = JSON.parse(atob(data));
 
-    try {
-        const decodedData = JSON.parse(atob(data));
-        console.log("Decoded Data:", decodedData);
+            // Validate the decoded data
+            if (!decodedData || typeof decodedData !== 'object') {
+                console.warn("Invalid data format in the link. Loading default state.");
+                return false;
+            }
 
-        if (!decodedData || typeof decodedData !== 'object') {
-            console.warn("Invalid data format in the link.");
+            if (!decodedData.courses || !Array.isArray(decodedData.courses)) {
+                console.warn("Invalid or missing 'courses' data in the link. Loading default state.");
+                return false;
+            }
+
+            if (typeof decodedData.maxDPlusAllowed !== 'number') {
+                console.warn("Invalid or missing 'maxDPlusAllowed' in the link. Loading default state.");
+                return false;
+            }
+
+            if (!decodedData.requiredCourses || !Array.isArray(decodedData.requiredCourses)) {
+                console.warn("Invalid or missing 'requiredCourses' data in the link. Loading default state.");
+                return false;
+            }
+
+            if (!decodedData.major || typeof decodedData.major !== 'string') {
+                console.warn("Invalid or missing 'major' data in the link. Loading default state.");
+                return false;
+            }
+
+            // Apply the loaded data to the application state
+            courses = decodedData.courses;
+            maxDPlusAllowed = decodedData.maxDPlusAllowed;
+            requiredCourses = decodedData.requiredCourses;
+
+            // Update the major if it exists in the data
+            const majorSelect = document.getElementById('major-select');
+            if (majorSelect && decodedData.major) {
+                majorSelect.value = decodedData.major;
+            }
+
+            // Update the D limit display
+            const maxDPlusElement = document.getElementById('max-d-plus');
+            if (maxDPlusElement) {
+                maxDPlusElement.textContent = maxDPlusAllowed;
+            }
+
+            // Update the UI
+            renderCourses();
+            renderRequiredCourses();
+            updateAllGraphs();
+
+            // Save the current state to detect unsaved changes later
+            window.linkGenerated = true;
+            window.lastSavedState = JSON.stringify(decodedData);
+
+            console.log("Successfully loaded data from link:", courses.length, "courses");
+
+            // Show a success notification to the user
+            showNotification("Course data loaded successfully!");
+            return true;
+        } catch (error) {
+            console.warn("Failed to load from sharable link:", error);
             return false;
         }
-
-        // Validate required fields
-        if (!decodedData.courses || !Array.isArray(decodedData.courses)) {
-            console.warn("Invalid or missing 'courses' data in the link.");
-            return false;
-        }
-
-        // Apply the loaded data
-        courses = decodedData.courses;
-        maxDPlusAllowed = decodedData.maxDPlusAllowed;
-        requiredCourses = decodedData.requiredCourses;
-
-        const majorSelect = document.getElementById('major-select');
-        if (majorSelect && decodedData.major) {
-            majorSelect.value = decodedData.major;
-        }
-
-        // Update the UI
-        renderCourses();
-        renderRequiredCourses();
-        updateAllGraphs();
-
-        console.log("Successfully loaded data from link.");
-        showNotification("Course data loaded successfully!");
-        return true;
-    } catch (error) {
-        console.error("Failed to load from sharable link:", error);
-        return false;
     }
+    return false;
 }
 
 // Ensure the loadFromSharableLink function is called AFTER the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', () => {
-    initialize(); // Initialize the application
-    loadFromSharableLink(); // Load data from the URL
+window.addEventListener('load', () => {
+    loadFromSharableLink();
 });
 
 function hasUnsavedChanges() {
