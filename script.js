@@ -1138,8 +1138,10 @@ function generateSharableLink() {
     // Encode the data to base64
     const encodedData = btoa(JSON.stringify(data));
 
-    // Generate the sharable link
-    const link = `${window.location.origin}${window.location.pathname}?data=${encodedData}`;
+    // Generate the sharable link for GitHub Pages
+    // This ensures it works regardless of whether you're on localhost or GitHub Pages
+    const baseUrl = 'https://falahsheikh.github.io/UCalgaryDegreeNav/';
+    const link = `${baseUrl}?data=${encodedData}`;
 
     // Save the current state to detect unsaved changes later
     window.linkGenerated = true;
