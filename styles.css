@@ -253,6 +253,10 @@ button:hover {
     background-color: #f9fafb;
 }
 
+.cancel-button {
+    margin-left: 5px;
+}
+
 .add-term-button, .add-course-button {
     display: flex;
     align-items: center;
