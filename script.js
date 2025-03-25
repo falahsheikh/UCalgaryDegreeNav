@@ -324,8 +324,14 @@ let gpaChart = null;
 let gpaLineChart = null;
 
 function initializeCoursesForMajor(major) {
+    // Clear existing courses
+    courses = [];
+    
+    // Get all courses for the major
+    const majorCourses = AVAILABLE_COURSES[major] || [];
+    
     // Only include courses that have both defaultTerm and defaultYear
-    courses = AVAILABLE_COURSES[major]
+    courses = majorCourses
         .filter(course => course.defaultTerm !== undefined && course.defaultYear !== undefined)
         .map(course => ({
             ...course,
@@ -338,7 +344,7 @@ function initializeCoursesForMajor(major) {
     
     requiredCourses = courses.filter(course => course.required);
     
-    // Ensure the year filter dropdown has options for years 1-4
+    // Update UI elements
     updateYearFilterOptions();
 }
 
@@ -1177,82 +1183,99 @@ function generateSharableLink() {
     });
 }
 
+function initializeCoursesForMajor(major) {
+    // Clear existing courses
+    courses = [];
+    
+    // Get all courses for the major
+    const majorCourses = AVAILABLE_COURSES[major] || [];
+    
+    // Only include courses that have both defaultTerm and defaultYear
+    courses = majorCourses
+        .filter(course => course.defaultTerm !== undefined && course.defaultYear !== undefined)
+        .map(course => ({
+            ...course,
+            term: course.defaultTerm,
+            year: course.defaultYear,
+            completed: false,
+            grade: null,
+            required: MAJOR_REQUIREMENTS[major].includes(course.id)
+        }));
+    
+    requiredCourses = courses.filter(course => course.required);
+    
+    // Update UI elements
+    updateYearFilterOptions();
+}
+
 function loadFromSharableLink() {
     const urlParams = new URLSearchParams(window.location.search);
-    const data = urlParams.get('data');
+    const encodedData = urlParams.get('data');
 
-    if (!data) {
+    if (!encodedData) {
         return false;
     }
 
     try {
-        // First try to decode and parse the data
-        let decoded;
-        try {
-            decoded = JSON.parse(atob(data));
-        } catch (e) {
-            console.error("Failed to parse plan data:", e);
-            throw new Error("Invalid data format");
+        // Decode the data
+        const decodedData = JSON.parse(atob(encodedData));
+        
+        // Validate the data structure
+        if (!decodedData || typeof decodedData !== 'object' || !Array.isArray(decodedData.courses)) {
+            console.error("Invalid data structure in sharable link");
+            return false;
         }
 
-        // Validate basic structure
-        if (!decoded || typeof decoded !== 'object') {
-            throw new Error("Invalid data structure");
-        }
-
-        // Set major with fallback
+        // Set the major
         const majorSelect = document.getElementById('major-select');
         const availableMajors = Object.keys(AVAILABLE_COURSES);
-        const major = availableMajors.includes(decoded.major) 
-            ? decoded.major 
+        const major = availableMajors.includes(decodedData.major) 
+            ? decodedData.major 
             : availableMajors[0];
         majorSelect.value = major;
 
-        // Process courses with validation
+        // Process courses
         const loadedCourses = [];
-        if (Array.isArray(decoded.courses)) {
-            decoded.courses.forEach(courseData => {
-                if (!courseData || !courseData.id) {
-                    console.warn("Skipping invalid course data:", courseData);
-                    return;
-                }
+        const majorCourses = AVAILABLE_COURSES[major] || [];
 
-                // Find in available courses or create minimal template
-                const availableCourse = AVAILABLE_COURSES[major].find(c => c.id === courseData.id);
-                const courseTemplate = availableCourse || {
-                    id: courseData.id,
-                    name: courseData.name || `Course ${courseData.id}`,
-                    credits: courseData.credits || 3,
-                    prerequisite: Array.isArray(courseData.prerequisite) 
-                        ? courseData.prerequisite 
-                        : [],
-                    defaultTerm: 'Fall',
-                    defaultYear: 1
-                };
+        decodedData.courses.forEach(savedCourse => {
+            // Find the course in available courses to get full details
+            const courseTemplate = majorCourses.find(c => c.id === savedCourse.id) || {
+                id: savedCourse.id,
+                name: savedCourse.name || `Course ${savedCourse.id}`,
+                credits: savedCourse.credits || 3,
+                prerequisite: Array.isArray(savedCourse.prerequisite) 
+                    ? savedCourse.prerequisite 
+                    : [],
+                defaultTerm: 'Fall',
+                defaultYear: 1
+            };
 
-                loadedCourses.push({
-                    ...courseTemplate,
-                    term: courseData.term || courseTemplate.defaultTerm || 'Fall',
-                    year: courseData.year || courseTemplate.defaultYear || 1,
-                    completed: Boolean(courseData.completed),
-                    grade: typeof courseData.grade === 'string' ? courseData.grade : null,
-                    required: MAJOR_REQUIREMENTS[major]?.includes(courseData.id) || false
-                });
+            loadedCourses.push({
+                ...courseTemplate,
+                term: savedCourse.term || courseTemplate.defaultTerm || 'Fall',
+                year: savedCourse.year || courseTemplate.defaultYear || 1,
+                completed: Boolean(savedCourse.completed),
+                grade: typeof savedCourse.grade === 'string' ? savedCourse.grade : null,
+                required: MAJOR_REQUIREMENTS[major]?.includes(savedCourse.id) || false
             });
-        }
+        });
 
         // Only update if we have valid courses
         if (loadedCourses.length > 0) {
             courses = loadedCourses;
-            maxDPlusAllowed = typeof decoded.maxDPlusAllowed === 'number'
-                ? Math.max(0, decoded.maxDPlusAllowed)
+            maxDPlusAllowed = typeof decodedData.maxDPlusAllowed === 'number'
+                ? Math.max(0, decodedData.maxDPlusAllowed)
                 : 2;
             
             document.getElementById('d-plus-limit').value = maxDPlusAllowed;
+            
+            // Update the UI
             updateRequiredCourses();
             renderCourses();
             updateAllGraphs();
 
+            // Update saved state tracking
             window.linkGenerated = true;
             window.lastSavedState = JSON.stringify({
                 courses: courses,
@@ -1263,13 +1286,34 @@ function loadFromSharableLink() {
             return true;
         }
     } catch (error) {
-        console.error("Error loading plan:", error);
+        console.error("Error loading from sharable link:", error);
     }
 
-    // If we get here, loading failed - initialize defaults
-    console.log("Loading failed - initializing default plan");
-    initializeDefaultCourses();
     return false;
+}
+
+function resetPlan() {
+    if (confirm("Are you sure you want to reset your plan? This will clear all your courses and start fresh.")) {
+        const major = document.getElementById('major-select').value;
+        initializeCoursesForMajor(major);
+        maxDPlusAllowed = 2;
+        document.getElementById('d-plus-limit').value = maxDPlusAllowed;
+        
+        // Reset the URL without the data parameter
+        if (window.history.replaceState) {
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+        }
+        
+        // Update UI
+        updateRequiredCourses();
+        renderCourses();
+        updateAllGraphs();
+        
+        // Reset saved state tracking
+        window.linkGenerated = false;
+        window.lastSavedState = null;
+    }
 }
 
 function initializeDefaultCourses() {
@@ -1470,18 +1514,31 @@ function initialize() {
     // Initialize courses for the default major (Computer Science)
     initializeCoursesForMajor('Computer Science');
     
-    // Update year filter options
-    updateYearFilterOptions();
-    
     // Try to load from sharable link if available
     const loadedFromLink = loadFromSharableLink();
     
-    // Only render courses if not loaded from link (to avoid duplicating the render)
+    // If not loaded from link, render default courses
     if (!loadedFromLink) {
         renderCourses();
         renderRequiredCourses();
         updateAllGraphs();
     }
+    
+    // Set up event listeners
+    setupEventListeners();
+}
+
+function setupEventListeners() {
+    document.getElementById('search').addEventListener('input', renderCourses);
+    document.getElementById('year-filter').addEventListener('change', renderCourses);
+    document.getElementById('term-filter').addEventListener('change', renderCourses);
+    document.getElementById('status-filter').addEventListener('change', renderCourses);
+    document.getElementById('major-select').addEventListener('change', updateMajor);
+    document.getElementById('generate-link').addEventListener('click', generateSharableLink);
+    document.getElementById('reset-plan').addEventListener('click', resetPlan);
+    document.getElementById('d-plus-limit').addEventListener('change', setDPlusLimit);
+    document.getElementById('add-year-button').addEventListener('click', addYear);
+    document.getElementById('delete-year-button').addEventListener('click', deleteYear);
 }
 
 function updateAllGraphs() {
@@ -1785,6 +1842,8 @@ document.getElementById('search').addEventListener('input', renderCourses);
 document.getElementById('year-filter').addEventListener('change', renderCourses);
 document.getElementById('term-filter').addEventListener('change', renderCourses);
 document.getElementById('status-filter').addEventListener('change', renderCourses);
+document.addEventListener('DOMContentLoaded', initialize);
+
 
 // Initialize courses for the default major (Computer Science)
 initializeCoursesForMajor('Computer Science');
