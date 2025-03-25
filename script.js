@@ -1144,25 +1144,37 @@ function setDPlusLimit() {
 }
 
 function generateSharableLink() {
+    // Prepare all data to be saved
     const data = {
-        courses: JSON.parse(JSON.stringify(courses)), // Deep copy to avoid reference issues
-        maxDPlusAllowed,
-        requiredCourses: JSON.parse(JSON.stringify(requiredCourses || [])), // Deep copy
-        major: document.getElementById('major-select')?.value || 'Computer Science'
+        courses: courses.map(course => ({
+            id: course.id,
+            name: course.name,
+            credits: course.credits,
+            prerequisite: course.prerequisite,
+            term: course.term,
+            year: course.year,
+            completed: course.completed,
+            grade: course.grade,
+            required: course.required
+        })),
+        maxDPlusAllowed: maxDPlusAllowed,
+        major: document.getElementById('major-select').value
     };
 
-    // Encode the data to base64
+    // Encode to base64
     const encodedData = btoa(JSON.stringify(data));
-
-    // Generate the sharable link
     const link = `${window.location.origin}${window.location.pathname}?data=${encodedData}`;
 
-    // Save the current state to detect unsaved changes later
+    // Save state
     window.linkGenerated = true;
     window.lastSavedState = JSON.stringify(data);
 
-    // Prompt the user with the sharable link
-    prompt("Share this link to save your progress:", link);
+    // Copy to clipboard and show notification
+    navigator.clipboard.writeText(link).then(() => {
+        showNotification("Sharable link copied to clipboard!");
+    }).catch(() => {
+        prompt("Copy this link to share your plan:", link);
+    });
 }
 
 function loadFromSharableLink() {
@@ -1171,71 +1183,63 @@ function loadFromSharableLink() {
 
     if (data) {
         try {
-            // Decode the data from base64
+            // Parse the data
             const decodedData = JSON.parse(atob(data));
-
-            // Validate the decoded data
-            if (!decodedData || typeof decodedData !== 'object') {
-                console.warn("Invalid data format in the link. Loading default state.");
-                return false;
+            
+            // Validate
+            if (!decodedData?.courses || !Array.isArray(decodedData.courses)) {
+                throw new Error("Invalid course data");
             }
 
-            if (!decodedData.courses || !Array.isArray(decodedData.courses)) {
-                console.warn("Invalid or missing 'courses' data in the link. Loading default state.");
-                return false;
-            }
-
-            if (typeof decodedData.maxDPlusAllowed !== 'number') {
-                console.warn("Invalid or missing 'maxDPlusAllowed' in the link. Loading default state.");
-                return false;
-            }
-
-            if (!decodedData.major || typeof decodedData.major !== 'string') {
-                console.warn("Invalid or missing 'major' data in the link. Loading default state.");
-                return false;
+            // Set major first
+            const majorSelect = document.getElementById('major-select');
+            if (decodedData.major && AVAILABLE_COURSES[decodedData.major]) {
+                majorSelect.value = decodedData.major;
             }
 
             // Clear existing courses
             courses = [];
 
-            // Set the major first before processing courses
-            const majorSelect = document.getElementById('major-select');
-            if (majorSelect && decodedData.major) {
-                majorSelect.value = decodedData.major;
-            }
-
-            // Process and add each course from the link
+            // Process each course from the link
             decodedData.courses.forEach(courseData => {
-                // Find the course in AVAILABLE_COURSES to get full details
                 const major = decodedData.major || 'Computer Science';
-                const availableCourse = AVAILABLE_COURSES[major].find(c => c.id === courseData.id);
+                let courseTemplate = AVAILABLE_COURSES[major].find(c => c.id === courseData.id);
                 
-                if (availableCourse) {
-                    // Create a new course object with all properties
-                    const newCourse = {
-                        ...availableCourse, // Start with all properties from AVAILABLE_COURSES
-                        ...courseData,     // Override with user-specific data
-                        // Ensure these properties are properly set
-                        completed: courseData.completed || false,
-                        grade: courseData.grade || null,
-                        required: MAJOR_REQUIREMENTS[major].includes(courseData.id)
+                // If not found in available courses, it might be a custom addition
+                if (!courseTemplate) {
+                    courseTemplate = {
+                        id: courseData.id,
+                        name: courseData.name || courseData.id,
+                        credits: courseData.credits || 3,
+                        prerequisite: courseData.prerequisite || [],
+                        defaultTerm: courseData.term || 'Fall',
+                        defaultYear: courseData.year || 1
                     };
-                    
-                    // Add to courses array
-                    courses.push(newCourse);
                 }
+
+                // Create the course with user's modifications
+                const course = {
+                    ...courseTemplate,
+                    term: courseData.term || courseTemplate.defaultTerm || 'Fall',
+                    year: courseData.year || courseTemplate.defaultYear || 1,
+                    completed: courseData.completed || false,
+                    grade: courseData.grade || null,
+                    required: courseData.required || MAJOR_REQUIREMENTS[major]?.includes(courseData.id) || false
+                };
+
+                courses.push(course);
             });
 
-            // Update other settings from the link
+            // Apply other settings
             maxDPlusAllowed = decodedData.maxDPlusAllowed || 2;
             document.getElementById('d-plus-limit').value = maxDPlusAllowed;
 
-            // Update the UI completely
+            // Update UI
             updateRequiredCourses();
             renderCourses();
             updateAllGraphs();
 
-            // Save the current state to detect unsaved changes later
+            // Save state
             window.linkGenerated = true;
             window.lastSavedState = JSON.stringify({
                 courses: courses,
@@ -1243,15 +1247,24 @@ function loadFromSharableLink() {
                 major: majorSelect.value
             });
 
-            console.log("Successfully loaded data from link:", courses.length, "courses");
-            showNotification("Course data loaded successfully!");
+            showNotification("Plan loaded successfully!");
             return true;
         } catch (error) {
-            console.error("Failed to load from sharable link:", error);
+            console.error("Error loading from link:", error);
+            showNotification("Error loading plan. Using default instead.");
+            initializeDefaultCourses();
             return false;
         }
     }
     return false;
+}
+
+function initializeDefaultCourses() {
+    const major = document.getElementById('major-select').value;
+    courses = [];
+    initializeCoursesForMajor(major);
+    renderCourses();
+    updateAllGraphs();
 }
 
 // Ensure the loadFromSharableLink function is called AFTER the DOM is fully loaded
