@@ -1039,15 +1039,22 @@ function addCourseToTerm(year, term) {
     const selectionContainer = document.createElement('div');
     selectionContainer.className = 'course-selection-container';
 
+    // Add this to your term container styling:
+    termContainer.style.overflow = 'visible'; // Allow dropdown to overflow if needed
+    termContainer.style.position = 'relative'; // Create positioning context
+
     // Add search input
     const searchInput = document.createElement('input');
     searchInput.type = 'text';
     searchInput.placeholder = 'Search courses...';
     searchInput.className = 'course-search-input';
     
+    const dropdownContainer = document.createElement('div');
+    dropdownContainer.className = 'course-dropdown-container';
+    
     const dropdown = document.createElement('select');
     dropdown.className = 'course-dropdown';
-    dropdown.size = 5; // Make it a scrollable list
+    dropdown.size = 8; // Show more items by default
     dropdown.multiple = false;
 
     // Function to populate dropdown based on search term
@@ -1070,6 +1077,7 @@ function addCourseToTerm(year, term) {
                 const option = document.createElement('option');
                 option.value = course.id;
                 option.textContent = `${course.id} - ${course.name}`;
+                option.title = `${course.id} - ${course.name}`; // Add tooltip
                 dropdown.appendChild(option);
             });
         }
@@ -1111,7 +1119,7 @@ function addCourseToTerm(year, term) {
             prerequisite: course.prerequisite,
             term,
             year: parseInt(year),
-            completed: ['COOP', 'BREAK'].includes(courseId), // Co-op and break courses are marked as completed by default
+            completed: ['COOP', 'BREAK'].includes(courseId),
             grade: null,
             required: isRequired
         });
@@ -1131,8 +1139,9 @@ function addCourseToTerm(year, term) {
         termContainer.removeChild(selectionContainer);
     };
 
+    dropdownContainer.appendChild(dropdown);
     selectionContainer.appendChild(searchInput);
-    selectionContainer.appendChild(dropdown);
+    selectionContainer.appendChild(dropdownContainer);
     buttonContainer.appendChild(confirmButton);
     buttonContainer.appendChild(cancelButton);
 

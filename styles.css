@@ -470,6 +470,23 @@ canvas {
     font-size: 11px;
 }
 
+/* Course selection container - stays within term container */
+.course-selection-container {
+    position: absolute; /* Position absolutely within term container */
+    top: 100px; /* Position below the term header */
+    left: 0;
+    width: 100%;
+    max-width: 240px; /* Match term container width */
+    margin-left: 5px;
+    background: #f3f4f6;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+/* Search input styling */
 .course-search-input {
     width: 100%;
     padding: 8px;
@@ -479,21 +496,43 @@ canvas {
     box-sizing: border-box;
 }
 
-.course-dropdown {
+/* Dropdown container */
+.course-dropdown-container {
     width: 100%;
-    height: 150px;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    margin-bottom: 8px;
+    max-height: 300px;
     overflow-y: auto;
 }
 
+/* Dropdown itself */
+.course-dropdown {
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+}
+
+/* Dropdown options */
 .course-dropdown option {
-    padding: 4px;
+    padding: 8px 12px;
     cursor: pointer;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .course-dropdown option:hover {
-    background-color: #f0f0f0;
+    background-color: #f5f5f5;
+}
+
+/* Buttons container */
+.selection-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+/* Term container needs relative positioning */
+.term-container {
+    position: relative;
 }
