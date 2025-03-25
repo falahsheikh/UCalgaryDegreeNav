@@ -735,8 +735,20 @@ function showCreditBreakdown() {
                        major === 'Mathematics' ? 'MATH' : 
                        major === 'Physics' ? 'PHYS' : '';
 
-    courses.filter(course => course.completed && course.grade !== 'F').forEach(course => {
-        const level = course.id.match(/\d+/)[0].charAt(0) + '00';
+    // Filter out COOP and BREAK courses (0 credits) and failed courses
+    courses.filter(course => 
+        course.completed && 
+        course.grade !== 'F' && 
+        course.credits > 0  // Exclude 0-credit courses like COOP/BREAK
+    ).forEach(course => {
+        const levelMatch = course.id.match(/\d+/);
+        if (!levelMatch) return; // Skip if no number in course ID
+        
+        const level = levelMatch[0].charAt(0) + '00';
+        if (!breakdown[level]) {
+            breakdown[level] = { major: 0, other: 0 }; // Initialize if level doesn't exist
+        }
+        
         if (course.id.startsWith(majorPrefix)) {
             breakdown[level].major += course.credits;
         } else {
@@ -746,7 +758,11 @@ function showCreditBreakdown() {
 
     const breakdownBody = document.getElementById('credit-breakdown-body');
     breakdownBody.innerHTML = '';
-    Object.keys(breakdown).forEach(level => {
+    
+    // Sort levels numerically (100, 200, etc.)
+    const sortedLevels = Object.keys(breakdown).sort();
+    
+    sortedLevels.forEach(level => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${level}</td>
