@@ -394,6 +394,14 @@ function renderCourses() {
     const yearSections = document.getElementById('year-sections');
     yearSections.innerHTML = '';
 
+    // Create tooltip element if it doesn't exist
+    let tooltip = document.querySelector('.course-tooltip');
+    if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.className = 'course-tooltip';
+        document.body.appendChild(tooltip);
+    }
+
     if (selectedYear === 'all') {
         // Find all years that exist in the data, or should exist by default
         const defaultYears = [1, 2, 3, 4];
@@ -411,6 +419,7 @@ function renderCourses() {
             `;
             const termGrid = document.createElement('div');
             termGrid.className = 'grid';
+            
             ['Fall', 'Winter', 'Spring', 'Summer'].forEach(term => {
                 const termContainer = document.createElement('div');
                 termContainer.className = 'term-container';
@@ -418,22 +427,40 @@ function renderCourses() {
                 termContainer.dataset.year = year;
                 termContainer.ondrop = handleDrop;
                 termContainer.ondragover = allowDrop;
-                termContainer.innerHTML = `
-                    <div class="term-header">
-                        <span>${term} Term</span>
-                        ${canAddCourse(year, term) ? `
-                            <div class="add-course-button" onclick="addCourseToTerm(${year}, '${term}')" title="Add courses">
-                                <span class="material-symbols-outlined">add</span>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
+                
+                const termHeader = document.createElement('div');
+                termHeader.className = 'term-header';
+                termHeader.innerHTML = `<span>${term} Term</span>`;
+                
+                if (canAddCourse(year, term)) {
+                    const addButton = document.createElement('div');
+                    addButton.className = 'add-course-button';
+                    addButton.innerHTML = '<span class="material-symbols-outlined">add</span>';
+                    addButton.onclick = () => addCourseToTerm(year, term);
+                    
+                    // Add hover events for tooltip
+                    addButton.addEventListener('mousemove', (e) => {
+                        tooltip.textContent = 'Add courses to this term';
+                        tooltip.style.display = 'block';
+                        tooltip.style.top = `${e.clientY + 15}px`;
+                        tooltip.style.left = `${e.clientX + 15}px`;
+                    });
+                    
+                    addButton.addEventListener('mouseleave', () => {
+                        tooltip.style.display = 'none';
+                    });
+                    
+                    termHeader.appendChild(addButton);
+                }
+                
+                termContainer.appendChild(termHeader);
                 const termCourses = yearCourses.filter(course => course.term === term);
                 termCourses.forEach(course => {
                     termContainer.appendChild(createCourseCard(course));
                 });
                 termGrid.appendChild(termContainer);
             });
+            
             yearSection.appendChild(termGrid);
             yearSections.appendChild(yearSection);
         });
@@ -446,6 +473,7 @@ function renderCourses() {
         `;
         const termGrid = document.createElement('div');
         termGrid.className = 'grid';
+        
         ['Fall', 'Winter', 'Spring', 'Summer'].forEach(term => {
             const termContainer = document.createElement('div');
             termContainer.className = 'term-container';
@@ -453,22 +481,40 @@ function renderCourses() {
             termContainer.dataset.year = selectedYear;
             termContainer.ondrop = handleDrop;
             termContainer.ondragover = allowDrop;
-            termContainer.innerHTML = `
-                <div class="term-header">
-                    <span>${term} Term</span>
-                    ${canAddCourse(selectedYear, term) ? `
-                        <div class="add-course-button" onclick="addCourseToTerm(${selectedYear}, '${term}')" title="Add courses">
-                            <span class="material-symbols-outlined">add</span>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
+            
+            const termHeader = document.createElement('div');
+            termHeader.className = 'term-header';
+            termHeader.innerHTML = `<span>${term} Term</span>`;
+            
+            if (canAddCourse(selectedYear, term)) {
+                const addButton = document.createElement('div');
+                addButton.className = 'add-course-button';
+                addButton.innerHTML = '<span class="material-symbols-outlined">add</span>';
+                addButton.onclick = () => addCourseToTerm(selectedYear, term);
+                
+                // Add hover events for tooltip
+                addButton.addEventListener('mousemove', (e) => {
+                    tooltip.textContent = 'Add courses to this term';
+                    tooltip.style.display = 'block';
+                    tooltip.style.top = `${e.clientY + 15}px`;
+                    tooltip.style.left = `${e.clientX + 15}px`;
+                });
+                
+                addButton.addEventListener('mouseleave', () => {
+                    tooltip.style.display = 'none';
+                });
+                
+                termHeader.appendChild(addButton);
+            }
+            
+            termContainer.appendChild(termHeader);
             const termCourses = filtered.filter(course => course.term === term);
             termCourses.forEach(course => {
                 termContainer.appendChild(createCourseCard(course));
             });
             termGrid.appendChild(termContainer);
         });
+        
         yearSection.appendChild(termGrid);
         yearSections.appendChild(yearSection);
     }
@@ -482,6 +528,17 @@ function renderCourses() {
     updateGPAChart();
     renderRequiredCourses();
 }
+
+// Add this to your initialization code
+document.addEventListener('mouseout', (e) => {
+    // Check if we're leaving an element with a tooltip
+    if (!e.relatedTarget || !e.relatedTarget.closest('.add-course-button')) {
+        const tooltip = document.querySelector('.course-tooltip');
+        if (tooltip) {
+            tooltip.style.display = 'none';
+        }
+    }
+});
 
 function createCourseCard(course) {
     const card = document.createElement('div');
