@@ -1039,14 +1039,49 @@ function addCourseToTerm(year, term) {
     const selectionContainer = document.createElement('div');
     selectionContainer.className = 'course-selection-container';
 
+    // Add search input
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.placeholder = 'Search courses...';
+    searchInput.className = 'course-search-input';
+    
     const dropdown = document.createElement('select');
     dropdown.className = 'course-dropdown';
-    dropdown.innerHTML = `
-        <option value="">Select a course</option>
-        ${availableCourses.map(course => `
-            <option value="${course.id}">${course.id} - ${course.name}</option>
-        `).join('')}
-    `;
+    dropdown.size = 5; // Make it a scrollable list
+    dropdown.multiple = false;
+
+    // Function to populate dropdown based on search term
+    function populateDropdown(searchTerm = '') {
+        dropdown.innerHTML = ''; // Clear existing options
+        
+        const filteredCourses = availableCourses.filter(course => {
+            const searchLower = searchTerm.toLowerCase();
+            return course.id.toLowerCase().includes(searchLower) || 
+                   course.name.toLowerCase().includes(searchLower);
+        });
+
+        if (filteredCourses.length === 0) {
+            const noResults = document.createElement('option');
+            noResults.textContent = 'No courses found';
+            noResults.disabled = true;
+            dropdown.appendChild(noResults);
+        } else {
+            filteredCourses.forEach(course => {
+                const option = document.createElement('option');
+                option.value = course.id;
+                option.textContent = `${course.id} - ${course.name}`;
+                dropdown.appendChild(option);
+            });
+        }
+    }
+
+    // Initial population
+    populateDropdown();
+
+    // Search functionality
+    searchInput.addEventListener('input', (e) => {
+        populateDropdown(e.target.value);
+    });
 
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'selection-buttons';
@@ -1096,13 +1131,17 @@ function addCourseToTerm(year, term) {
         termContainer.removeChild(selectionContainer);
     };
 
+    selectionContainer.appendChild(searchInput);
+    selectionContainer.appendChild(dropdown);
     buttonContainer.appendChild(confirmButton);
     buttonContainer.appendChild(cancelButton);
 
-    selectionContainer.appendChild(dropdown);
     selectionContainer.appendChild(buttonContainer);
 
     termContainer.appendChild(selectionContainer);
+
+    // Focus the search input when the dropdown appears
+    searchInput.focus();
 }
 
 function deleteCourse(id) {

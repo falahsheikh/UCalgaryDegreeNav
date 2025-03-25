@@ -469,3 +469,31 @@ canvas {
 .grade-input::placeholder {
     font-size: 11px;
 }
+
+.course-search-input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.course-dropdown {
+    width: 100%;
+    height: 150px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    overflow-y: auto;
+}
+
+.course-dropdown option {
+    padding: 4px;
+    cursor: pointer;
+}
+
+.course-dropdown option:hover {
+    background-color: #f0f0f0;
+}
