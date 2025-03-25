@@ -1181,74 +1181,78 @@ function loadFromSharableLink() {
     const urlParams = new URLSearchParams(window.location.search);
     const data = urlParams.get('data');
 
-    if (data) {
+    if (!data) {
+        return false;
+    }
+
+    try {
+        // First try to decode and parse the data
+        let decoded;
         try {
-            // Parse the data with better error handling
-            let decodedData;
-            try {
-                decodedData = JSON.parse(atob(data));
-            } catch (e) {
-                console.error("Failed to decode data:", e);
-                throw new Error("Invalid data format");
-            }
+            decoded = JSON.parse(atob(data));
+        } catch (e) {
+            console.error("Failed to parse plan data:", e);
+            throw new Error("Invalid data format");
+        }
 
-            // Validate the structure
-            if (!decodedData || typeof decodedData !== 'object') {
-                throw new Error("Invalid data structure");
-            }
+        // Validate basic structure
+        if (!decoded || typeof decoded !== 'object') {
+            throw new Error("Invalid data structure");
+        }
 
-            // Set major with fallback
-            const majorSelect = document.getElementById('major-select');
-            const major = decodedData.major && AVAILABLE_COURSES[decodedData.major] 
-                ? decodedData.major 
-                : 'Computer Science';
-            majorSelect.value = major;
+        // Set major with fallback
+        const majorSelect = document.getElementById('major-select');
+        const availableMajors = Object.keys(AVAILABLE_COURSES);
+        const major = availableMajors.includes(decoded.major) 
+            ? decoded.major 
+            : availableMajors[0];
+        majorSelect.value = major;
 
-            // Process courses with better validation
-            const loadedCourses = [];
-            if (Array.isArray(decodedData.courses)) {
-                decodedData.courses.forEach(courseData => {
-                    if (!courseData.id) {
-                        console.warn("Skipping course with missing ID:", courseData);
-                        return;
-                    }
+        // Process courses with validation
+        const loadedCourses = [];
+        if (Array.isArray(decoded.courses)) {
+            decoded.courses.forEach(courseData => {
+                if (!courseData || !courseData.id) {
+                    console.warn("Skipping invalid course data:", courseData);
+                    return;
+                }
 
-                    // Find in available courses or create minimal template
-                    let courseTemplate = AVAILABLE_COURSES[major].find(c => c.id === courseData.id) || {
-                        id: courseData.id,
-                        name: courseData.name || courseData.id,
-                        credits: courseData.credits || 3,
-                        prerequisite: courseData.prerequisite || [],
-                        defaultTerm: 'Fall',
-                        defaultYear: 1
-                    };
+                // Find in available courses or create minimal template
+                const availableCourse = AVAILABLE_COURSES[major].find(c => c.id === courseData.id);
+                const courseTemplate = availableCourse || {
+                    id: courseData.id,
+                    name: courseData.name || `Course ${courseData.id}`,
+                    credits: courseData.credits || 3,
+                    prerequisite: Array.isArray(courseData.prerequisite) 
+                        ? courseData.prerequisite 
+                        : [],
+                    defaultTerm: 'Fall',
+                    defaultYear: 1
+                };
 
-                    loadedCourses.push({
-                        ...courseTemplate,
-                        term: courseData.term || courseTemplate.defaultTerm || 'Fall',
-                        year: courseData.year || courseTemplate.defaultYear || 1,
-                        completed: courseData.completed || false,
-                        grade: courseData.grade || null,
-                        required: MAJOR_REQUIREMENTS[major]?.includes(courseData.id) || false
-                    });
+                loadedCourses.push({
+                    ...courseTemplate,
+                    term: courseData.term || courseTemplate.defaultTerm || 'Fall',
+                    year: courseData.year || courseTemplate.defaultYear || 1,
+                    completed: Boolean(courseData.completed),
+                    grade: typeof courseData.grade === 'string' ? courseData.grade : null,
+                    required: MAJOR_REQUIREMENTS[major]?.includes(courseData.id) || false
                 });
-            }
+            });
+        }
 
-            // Apply the loaded courses
+        // Only update if we have valid courses
+        if (loadedCourses.length > 0) {
             courses = loadedCourses;
-
-            // Apply other settings with defaults
-            maxDPlusAllowed = typeof decodedData.maxDPlusAllowed === 'number' 
-                ? decodedData.maxDPlusAllowed 
+            maxDPlusAllowed = typeof decoded.maxDPlusAllowed === 'number'
+                ? Math.max(0, decoded.maxDPlusAllowed)
                 : 2;
+            
             document.getElementById('d-plus-limit').value = maxDPlusAllowed;
-
-            // Update UI
             updateRequiredCourses();
             renderCourses();
             updateAllGraphs();
 
-            // Save state
             window.linkGenerated = true;
             window.lastSavedState = JSON.stringify({
                 courses: courses,
@@ -1257,33 +1261,51 @@ function loadFromSharableLink() {
             });
 
             return true;
-        } catch (error) {
-            console.error("Error loading plan:", error);
-            initializeDefaultCourses();
-            return false;
         }
+    } catch (error) {
+        console.error("Error loading plan:", error);
     }
+
+    // If we get here, loading failed - initialize defaults
+    console.log("Loading failed - initializing default plan");
+    initializeDefaultCourses();
     return false;
 }
 
 function initializeDefaultCourses() {
     const major = document.getElementById('major-select').value;
+    
+    // Reset to empty array first
     courses = [];
     
-    // Initialize with all default courses for the major
-    courses = AVAILABLE_COURSES[major]
-        .filter(course => course.defaultTerm && course.defaultYear)
-        .map(course => ({
-            ...course,
-            term: course.defaultTerm,
-            year: course.defaultYear,
-            completed: false,
-            grade: null,
-            required: MAJOR_REQUIREMENTS[major].includes(course.id)
-        }));
+    // Get all courses for the major that have default term/year
+    const defaultCourses = AVAILABLE_COURSES[major].filter(
+        course => course.defaultTerm && course.defaultYear
+    );
 
+    // Create the course objects with all required properties
+    courses = defaultCourses.map(course => ({
+        id: course.id,
+        name: course.name,
+        credits: course.credits,
+        prerequisite: course.prerequisite || [],
+        term: course.defaultTerm,
+        year: course.defaultYear,
+        completed: false,
+        grade: null,
+        required: MAJOR_REQUIREMENTS[major].includes(course.id)
+    }));
+
+    // Reset D+ limit
+    maxDPlusAllowed = 2;
+    document.getElementById('d-plus-limit').value = maxDPlusAllowed;
+
+    // Update UI
+    updateRequiredCourses();
     renderCourses();
     updateAllGraphs();
+
+    console.log("Initialized default course plan for", major);
 }
 
 // Ensure the loadFromSharableLink function is called AFTER the DOM is fully loaded
