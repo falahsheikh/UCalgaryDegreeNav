@@ -509,6 +509,7 @@ canvas {
     border: 1px solid #ddd;
     border-radius: 4px;
     background-color: white;
+    max-height: 200px;
 }
 
 .course-dropdown option {
