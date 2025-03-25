@@ -518,7 +518,7 @@ function renderCourses() {
         yearSection.appendChild(termGrid);
         yearSections.appendChild(yearSection);
     }
-    
+
 
     // Show the "Add Year" button only if we're in "All Years" view
     const addYearButton = document.getElementById('add-year-button');
@@ -529,17 +529,6 @@ function renderCourses() {
     updateGPAChart();
     renderRequiredCourses();
 }
-
-// Add this to your initialization code
-document.addEventListener('mouseout', (e) => {
-    // Check if we're leaving an element with a tooltip
-    if (!e.relatedTarget || !e.relatedTarget.closest('.add-course-button')) {
-        const tooltip = document.querySelector('.course-tooltip');
-        if (tooltip) {
-            tooltip.style.display = 'none';
-        }
-    }
-});
 
 function createCourseCard(course) {
     const card = document.createElement('div');

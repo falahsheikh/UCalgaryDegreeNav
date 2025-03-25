@@ -547,5 +547,6 @@ canvas {
     pointer-events: none;
     z-index: 1000;
     display: none;
-    white-space: nowrap;
+    max-width: 200px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
