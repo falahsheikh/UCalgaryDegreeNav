@@ -1190,49 +1190,64 @@ function loadFromSharableLink() {
                 return false;
             }
 
-            if (!decodedData.requiredCourses || !Array.isArray(decodedData.requiredCourses)) {
-                console.warn("Invalid or missing 'requiredCourses' data in the link. Loading default state.");
-                return false;
-            }
-
             if (!decodedData.major || typeof decodedData.major !== 'string') {
                 console.warn("Invalid or missing 'major' data in the link. Loading default state.");
                 return false;
             }
 
-            // Apply the loaded data to the application state
-            courses = decodedData.courses;
-            maxDPlusAllowed = decodedData.maxDPlusAllowed;
-            requiredCourses = decodedData.requiredCourses;
+            // Clear existing courses
+            courses = [];
 
-            // Update the major if it exists in the data
+            // Set the major first before processing courses
             const majorSelect = document.getElementById('major-select');
             if (majorSelect && decodedData.major) {
                 majorSelect.value = decodedData.major;
             }
 
-            // Update the D limit display
-            const maxDPlusElement = document.getElementById('max-d-plus');
-            if (maxDPlusElement) {
-                maxDPlusElement.textContent = maxDPlusAllowed;
-            }
+            // Process and add each course from the link
+            decodedData.courses.forEach(courseData => {
+                // Find the course in AVAILABLE_COURSES to get full details
+                const major = decodedData.major || 'Computer Science';
+                const availableCourse = AVAILABLE_COURSES[major].find(c => c.id === courseData.id);
+                
+                if (availableCourse) {
+                    // Create a new course object with all properties
+                    const newCourse = {
+                        ...availableCourse, // Start with all properties from AVAILABLE_COURSES
+                        ...courseData,     // Override with user-specific data
+                        // Ensure these properties are properly set
+                        completed: courseData.completed || false,
+                        grade: courseData.grade || null,
+                        required: MAJOR_REQUIREMENTS[major].includes(courseData.id)
+                    };
+                    
+                    // Add to courses array
+                    courses.push(newCourse);
+                }
+            });
 
-            // Update the UI
+            // Update other settings from the link
+            maxDPlusAllowed = decodedData.maxDPlusAllowed || 2;
+            document.getElementById('d-plus-limit').value = maxDPlusAllowed;
+
+            // Update the UI completely
+            updateRequiredCourses();
             renderCourses();
-            renderRequiredCourses();
             updateAllGraphs();
 
             // Save the current state to detect unsaved changes later
             window.linkGenerated = true;
-            window.lastSavedState = JSON.stringify(decodedData);
+            window.lastSavedState = JSON.stringify({
+                courses: courses,
+                maxDPlusAllowed: maxDPlusAllowed,
+                major: majorSelect.value
+            });
 
             console.log("Successfully loaded data from link:", courses.length, "courses");
-
-            // Show a success notification to the user
             showNotification("Course data loaded successfully!");
             return true;
         } catch (error) {
-            console.warn("Failed to load from sharable link:", error);
+            console.error("Failed to load from sharable link:", error);
             return false;
         }
     }
@@ -1240,7 +1255,7 @@ function loadFromSharableLink() {
 }
 
 // Ensure the loadFromSharableLink function is called AFTER the DOM is fully loaded
-window.addEventListener('load', () => {
+window.addEventListener('DOMContentLoaded', () => {
     loadFromSharableLink();
 });
 
