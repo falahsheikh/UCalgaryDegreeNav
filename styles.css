@@ -428,14 +428,14 @@ canvas {
 }
 
 .course-color-label {
-    display: none; /* Hidden by default */
+    display: none; 
     background-color: white;
     padding: 8px 12px;
     border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     z-index: 1000;
-    pointer-events: none; /* Ensure it doesn't interfere with mouse events */
+    pointer-events: none; 
     font-size: 0.875rem;
     color: #333;
 }
@@ -444,7 +444,7 @@ canvas {
     width: 12px;
     height: 12px;
     border-radius: 3px;
-    border: 1px solid rgba(0, 0, 0, 0.1); /* Slight border for better visibility */
+    border: 1px solid rgba(0, 0, 0, 0.1); 
 }
 
 .add-year-button button {
@@ -472,11 +472,11 @@ canvas {
 
 /* Course selection container - stays within term container */
 .course-selection-container {
-    position: absolute; /* Position absolutely within term container */
-    top: 100px; /* Position below the term header */
+    position: absolute;
+    top: 100px; 
     left: 0;
     width: 100%;
-    max-width: 240px; /* Match term container width */
+    max-width: 240px;
     margin-left: 5px;
     background: #f3f4f6;
     border: 1px solid #ddd;
@@ -511,7 +511,6 @@ canvas {
     background-color: white;
 }
 
-/* Dropdown options */
 .course-dropdown option {
     padding: 8px 12px;
     cursor: pointer;
@@ -525,14 +524,12 @@ canvas {
     background-color: #f5f5f5;
 }
 
-/* Buttons container */
 .selection-buttons {
     display: flex;
     gap: 8px;
     margin-top: 8px;
 }
 
-/* Term container needs relative positioning */
 .term-container {
     position: relative;
 }

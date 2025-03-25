@@ -520,7 +520,6 @@ function renderCourses() {
     }
 
 
-    // Show the "Add Year" button only if we're in "All Years" view
     const addYearButton = document.getElementById('add-year-button');
     addYearButton.style.display = selectedYear === 'all' ? 'block' : 'none';
 
