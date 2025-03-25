@@ -422,7 +422,7 @@ function renderCourses() {
                     <div class="term-header">
                         <span>${term} Term</span>
                         ${canAddCourse(year, term) ? `
-                            <div class="add-course-button" onclick="addCourseToTerm(${year}, '${term}')">
+                            <div class="add-course-button" onclick="addCourseToTerm(${year}, '${term}')" title="Add courses">
                                 <span class="material-symbols-outlined">add</span>
                             </div>
                         ` : ''}
@@ -457,7 +457,7 @@ function renderCourses() {
                 <div class="term-header">
                     <span>${term} Term</span>
                     ${canAddCourse(selectedYear, term) ? `
-                        <div class="add-course-button" onclick="addCourseToTerm(${selectedYear}, '${term}')">
+                        <div class="add-course-button" onclick="addCourseToTerm(${selectedYear}, '${term}')" title="Add courses">
                             <span class="material-symbols-outlined">add</span>
                         </div>
                     ` : ''}
