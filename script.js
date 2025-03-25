@@ -1183,55 +1183,64 @@ function loadFromSharableLink() {
 
     if (data) {
         try {
-            // Parse the data
-            const decodedData = JSON.parse(atob(data));
-            
-            // Validate
-            if (!decodedData?.courses || !Array.isArray(decodedData.courses)) {
-                throw new Error("Invalid course data");
+            // Parse the data with better error handling
+            let decodedData;
+            try {
+                decodedData = JSON.parse(atob(data));
+            } catch (e) {
+                console.error("Failed to decode data:", e);
+                throw new Error("Invalid data format");
             }
 
-            // Set major first
+            // Validate the structure
+            if (!decodedData || typeof decodedData !== 'object') {
+                throw new Error("Invalid data structure");
+            }
+
+            // Set major with fallback
             const majorSelect = document.getElementById('major-select');
-            if (decodedData.major && AVAILABLE_COURSES[decodedData.major]) {
-                majorSelect.value = decodedData.major;
-            }
+            const major = decodedData.major && AVAILABLE_COURSES[decodedData.major] 
+                ? decodedData.major 
+                : 'Computer Science';
+            majorSelect.value = major;
 
-            // Clear existing courses
-            courses = [];
+            // Process courses with better validation
+            const loadedCourses = [];
+            if (Array.isArray(decodedData.courses)) {
+                decodedData.courses.forEach(courseData => {
+                    if (!courseData.id) {
+                        console.warn("Skipping course with missing ID:", courseData);
+                        return;
+                    }
 
-            // Process each course from the link
-            decodedData.courses.forEach(courseData => {
-                const major = decodedData.major || 'Computer Science';
-                let courseTemplate = AVAILABLE_COURSES[major].find(c => c.id === courseData.id);
-                
-                // If not found in available courses, it might be a custom addition
-                if (!courseTemplate) {
-                    courseTemplate = {
+                    // Find in available courses or create minimal template
+                    let courseTemplate = AVAILABLE_COURSES[major].find(c => c.id === courseData.id) || {
                         id: courseData.id,
                         name: courseData.name || courseData.id,
                         credits: courseData.credits || 3,
                         prerequisite: courseData.prerequisite || [],
-                        defaultTerm: courseData.term || 'Fall',
-                        defaultYear: courseData.year || 1
+                        defaultTerm: 'Fall',
+                        defaultYear: 1
                     };
-                }
 
-                // Create the course with user's modifications
-                const course = {
-                    ...courseTemplate,
-                    term: courseData.term || courseTemplate.defaultTerm || 'Fall',
-                    year: courseData.year || courseTemplate.defaultYear || 1,
-                    completed: courseData.completed || false,
-                    grade: courseData.grade || null,
-                    required: courseData.required || MAJOR_REQUIREMENTS[major]?.includes(courseData.id) || false
-                };
+                    loadedCourses.push({
+                        ...courseTemplate,
+                        term: courseData.term || courseTemplate.defaultTerm || 'Fall',
+                        year: courseData.year || courseTemplate.defaultYear || 1,
+                        completed: courseData.completed || false,
+                        grade: courseData.grade || null,
+                        required: MAJOR_REQUIREMENTS[major]?.includes(courseData.id) || false
+                    });
+                });
+            }
 
-                courses.push(course);
-            });
+            // Apply the loaded courses
+            courses = loadedCourses;
 
-            // Apply other settings
-            maxDPlusAllowed = decodedData.maxDPlusAllowed || 2;
+            // Apply other settings with defaults
+            maxDPlusAllowed = typeof decodedData.maxDPlusAllowed === 'number' 
+                ? decodedData.maxDPlusAllowed 
+                : 2;
             document.getElementById('d-plus-limit').value = maxDPlusAllowed;
 
             // Update UI
@@ -1244,14 +1253,12 @@ function loadFromSharableLink() {
             window.lastSavedState = JSON.stringify({
                 courses: courses,
                 maxDPlusAllowed: maxDPlusAllowed,
-                major: majorSelect.value
+                major: major
             });
 
-            showNotification("Plan loaded successfully!");
             return true;
         } catch (error) {
-            console.error("Error loading from link:", error);
-            showNotification("Error loading plan. Using default instead.");
+            console.error("Error loading plan:", error);
             initializeDefaultCourses();
             return false;
         }
@@ -1262,7 +1269,19 @@ function loadFromSharableLink() {
 function initializeDefaultCourses() {
     const major = document.getElementById('major-select').value;
     courses = [];
-    initializeCoursesForMajor(major);
+    
+    // Initialize with all default courses for the major
+    courses = AVAILABLE_COURSES[major]
+        .filter(course => course.defaultTerm && course.defaultYear)
+        .map(course => ({
+            ...course,
+            term: course.defaultTerm,
+            year: course.defaultYear,
+            completed: false,
+            grade: null,
+            required: MAJOR_REQUIREMENTS[major].includes(course.id)
+        }));
+
     renderCourses();
     updateAllGraphs();
 }
