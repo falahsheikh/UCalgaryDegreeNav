@@ -518,6 +518,7 @@ function renderCourses() {
         yearSection.appendChild(termGrid);
         yearSections.appendChild(yearSection);
     }
+    
 
     // Show the "Add Year" button only if we're in "All Years" view
     const addYearButton = document.getElementById('add-year-button');
