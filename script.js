@@ -20,7 +20,7 @@ const AVAILABLE_COURSES = {
         { id: 'SENG300', name: 'Software Engineering', credits: 3, prerequisite: ['CPSC233'], defaultTerm: 'Winter', defaultYear: 2 },
         { id: 'MATH211', name: 'Linear Methods I', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
         { id: 'MATH249', name: 'Introductory Calculus', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
-        { id: 'MATH265', name: 'Calculus I', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
+        { id: 'MATH265', name: 'Calculus I', credits: 3, prerequisite: []} ,
         { id: 'PHIL279', name: 'Logic I', credits: 3, prerequisite: [], defaultTerm: 'Fall', defaultYear: 1 },
         { id: 'PHIL314', name: 'Information Technology Ethics', credits: 3, prerequisite: ['PHIL279'], defaultTerm: 'Fall', defaultYear: 2 },
         { id: 'CPSC235', name: 'Introduction to Computer Science for Computer Science Majors II', credits: 3, prerequisite: ['CPSC233'] },
@@ -301,7 +301,7 @@ const MAJOR_REQUIREMENTS = {
     'Computer Science': [
         'CPSC231', 'CPSC233', 'CPSC251', 'CPSC331', 'CPSC351', 'CPSC355', 
         'CPSC413', 'CPSC449', 'CPSC457', 'SENG300', 'MATH211', 
-        'MATH249', 'PHIL279', 'PHIL314'
+        'PHIL279', 'PHIL314'
     ],
     'Mathematics': [
         'MATH211', 'MATH249', 'MATH267', 'MATH271', 'MATH311', 
