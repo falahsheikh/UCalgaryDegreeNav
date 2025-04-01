@@ -1346,11 +1346,14 @@ function showCustomCourseForm(year, term) {
         <div class="form-group">
             <label for="custom-course-credits">Credits:</label>
             <select id="custom-course-credits">
+                <option value="3">6</option>
+                <option value="3">5</option>
+                <option value="3">4</option>
                 <option value="3">3</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="4">4</option>
-                <option value="0">0 (for co-op/break)</option>
+                <option value="0">0</option>
             </select>
         </div>
         <div class="form-group">
