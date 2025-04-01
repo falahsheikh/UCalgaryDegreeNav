@@ -1185,11 +1185,24 @@ function addCourseToTerm(year, term) {
         termContainer.removeChild(selectionContainer);
     };
 
+    // Add new "Don't See Course?" button
+    const customCourseButton = document.createElement('button');
+    customCourseButton.textContent = 'Custom';
+    customCourseButton.className = 'custom-course-button';
+    customCourseButton.onclick = () => {
+        // Remove the current selection container
+        termContainer.removeChild(selectionContainer);
+        
+        // Show the custom course form
+        showCustomCourseForm(year, term);
+    };
+
     dropdownContainer.appendChild(dropdown);
     selectionContainer.appendChild(searchInput);
     selectionContainer.appendChild(dropdownContainer);
     buttonContainer.appendChild(confirmButton);
     buttonContainer.appendChild(cancelButton);
+    buttonContainer.appendChild(customCourseButton); // Add the new button
 
     selectionContainer.appendChild(buttonContainer);
 
@@ -1198,6 +1211,210 @@ function addCourseToTerm(year, term) {
     // Focus the search input when the dropdown appears
     searchInput.focus();
 }
+
+function showCustomCourseForm(year, term) {
+    const termContainer = document.querySelector(`.term-container[data-year="${year}"][data-term="${term}"]`);
+    
+    // Create form container
+    const formContainer = document.createElement('div');
+    formContainer.className = 'custom-course-form';
+    
+    // Form HTML
+    formContainer.innerHTML = `
+        <h4>Create Custom Course</h4>
+        <div class="form-group">
+            <label for="custom-course-id">Course ID:</label>
+            <input type="text" id="custom-course-id" placeholder="e.g., CPSC599">
+        </div>
+        <div class="form-group">
+            <label for="custom-course-name">Course Name:</label>
+            <input type="text" id="custom-course-name" placeholder="e.g., Special Topics in Computer Science">
+        </div>
+        <div class="form-group">
+            <label for="custom-course-credits">Credits:</label>
+            <select id="custom-course-credits">
+                <option value="3">3</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="4">4</option>
+                <option value="0">0 (for co-op/break)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="custom-course-prerequisites">Prerequisites (comma separated):</label>
+            <input type="text" id="custom-course-prerequisites" placeholder="e.g., CPSC231,CPSC233">
+        </div>
+        <div class="form-buttons">
+            <button class="save-custom-course">Save</button>
+            <button class="cancel-custom-course">Cancel</button>
+        </div>
+    `;
+    
+    // Add event listeners
+    formContainer.querySelector('.save-custom-course').addEventListener('click', () => {
+        saveCustomCourse(year, term, formContainer);
+    });
+    
+    formContainer.querySelector('.cancel-custom-course').addEventListener('click', () => {
+        termContainer.removeChild(formContainer);
+    });
+    
+    // Add to term container
+    termContainer.appendChild(formContainer);
+}
+
+function saveCustomCourse(year, term, formContainer) {
+    const idInput = formContainer.querySelector('#custom-course-id');
+    const nameInput = formContainer.querySelector('#custom-course-name');
+    const creditsInput = formContainer.querySelector('#custom-course-credits');
+    const prereqsInput = formContainer.querySelector('#custom-course-prerequisites');
+    
+    // Validate inputs
+    if (!idInput.value.trim()) {
+        alert("Please enter a course ID");
+        return;
+    }
+    
+    if (!nameInput.value.trim()) {
+        alert("Please enter a course name");
+        return;
+    }
+    
+    // Format prerequisites
+    const prerequisites = prereqsInput.value.trim() 
+        ? prereqsInput.value.split(',').map(p => p.trim()).filter(p => p)
+        : [];
+    
+    // Check if prerequisites exist in the system
+    const major = document.getElementById('major-select').value;
+    const allCourses = AVAILABLE_COURSES[major];
+    const invalidPrereqs = prerequisites.filter(p => !allCourses.some(c => c.id === p));
+    
+    if (invalidPrereqs.length > 0) {
+        const confirmAdd = confirm(`The following prerequisites don't exist in the system: ${invalidPrereqs.join(', ')}. Do you want to proceed anyway?`);
+        if (!confirmAdd) {
+            return;
+        }
+    }
+    
+    // Create the custom course
+    const customCourse = {
+        id: idInput.value.trim().toUpperCase(),
+        name: nameInput.value.trim(),
+        credits: parseInt(creditsInput.value),
+        prerequisite: prerequisites,
+        term,
+        year: parseInt(year),
+        completed: ['COOP', 'BREAK'].includes(idInput.value.trim().toUpperCase()),
+        grade: null,
+        required: false,
+        isCustom: true // Mark as custom course
+    };
+    
+    // Add to courses array
+    courses.push(customCourse);
+    
+    // Remove the form
+    const termContainer = formContainer.parentNode;
+    termContainer.removeChild(formContainer);
+    
+    // Update UI
+    updateRequiredCourses();
+    renderCourses();
+    
+    // Show success message
+    showNotification(`Custom course ${customCourse.id} added successfully!`);
+}
+
+// Add CSS for the custom course form
+function addCustomCourseStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .custom-course-form {
+            background: #f3f4f6;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .custom-course-form h4 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-group input, 
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .form-buttons button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid #e5e7eb;
+
+        }
+        
+        .save-custom-course {
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid #e5e7eb;
+            background-color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .cancel-custom-course {
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid #e5e7eb;
+            background-color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .custom-course-button {
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid #e5e7eb;
+            background-color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Call this function when initializing the app
+addCustomCourseStyles();
 
 function deleteCourse(id) {
     // Remove the course with the specified id
