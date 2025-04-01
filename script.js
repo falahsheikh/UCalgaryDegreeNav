@@ -534,32 +534,57 @@ function createCourseCard(course) {
     let statusClass = '';
     let isGreyedOut = false;
     let isSpecialCourse = ['COOP', 'BREAK'].includes(course.id);
+    let prereqWarning = '';
 
-    // Grey out co-op and break courses
-    if (isSpecialCourse) {
-        statusClass = 'special'; // Use a special class for co-op and break courses
-        isGreyedOut = true;
-    } else {
-        // Check if prerequisites are met for non-special courses
-        if (course.prerequisite.length > 0) {
-            const prerequisitesMet = course.prerequisite.every(prereq => {
-                const prereqCourse = courses.find(c => c.id === prereq);
-                return prereqCourse && prereqCourse.completed && PASSING_GRADES.includes(prereqCourse.grade);
-            });
-
-            if (!prerequisitesMet) {
-                statusClass = 'requirement-not-met';
-                isGreyedOut = true;
-            } else if (course.completed) {
-                statusClass = PASSING_GRADES.includes(course.grade) ? 'completed' : 'failed';
+    // Check prerequisites for non-special courses
+    if (!isSpecialCourse && course.prerequisite.length > 0) {
+        const unmetPrereqs = [];
+        const invalidGradePrereqs = [];
+        
+        course.prerequisite.forEach(prereqId => {
+            const prereqCourse = courses.find(c => c.id === prereqId);
+            
+            if (!prereqCourse) {
+                unmetPrereqs.push(prereqId);
+            } else if (prereqCourse.completed) {
+                if (!PASSING_GRADES.includes(prereqCourse.grade)) {
+                    invalidGradePrereqs.push({
+                        id: prereqId,
+                        grade: prereqCourse.grade
+                    });
+                }
             } else {
-                statusClass = 'in-progress';
+                unmetPrereqs.push(prereqId);
             }
-        } else if (course.completed) {
-            statusClass = PASSING_GRADES.includes(course.grade) ? 'completed' : 'failed';
-        } else {
-            statusClass = 'in-progress';
+        });
+
+        // Determine if course should be greyed out
+        if (unmetPrereqs.length > 0 || invalidGradePrereqs.length > 0) {
+            isGreyedOut = true;
+            statusClass = 'requirement-not-met';
+            
+            // Build prerequisite warning message
+            const warningParts = [];
+            
+            if (unmetPrereqs.length > 0) {
+                warningParts.push(`Missing prerequisites: ${unmetPrereqs.join(', ')}`);
+            }
+            
+            if (invalidGradePrereqs.length > 0) {
+                const invalidList = invalidGradePrereqs.map(p => 
+                    `${p.id} (${p.grade})`).join(', ');
+                warningParts.push(`Prerequisites with insufficient grades (need C- or higher): ${invalidList}`);
+            }
+            
+            prereqWarning = warningParts.join('<br>');
         }
+    }
+
+    // Set status class for completed courses
+    if (course.completed && !isGreyedOut) {
+        statusClass = PASSING_GRADES.includes(course.grade) ? 'completed' : 'failed';
+    } else if (!isGreyedOut) {
+        statusClass = 'in-progress';
     }
 
     card.className = `course-card ${statusClass}`;
@@ -570,10 +595,11 @@ function createCourseCard(course) {
         e.dataTransfer.setData('text/plain', course.id);
     };
 
-    // Show a warning if the course has prerequisites and has been given a D/D+ grade
+    // Show a warning if the course itself has D/D+ grade and has prerequisites
     const dPlusWarning = ['D+', 'D'].includes(course.grade) && course.prerequisite.length > 0 && !isSpecialCourse ?
-        `<div style="color: #dc2626; font-size: 0.875rem; margin-top: 0.5rem;">
-            Warning: ${course.grade} grade cannot be used as a prerequisite.
+        `<div class="grade-warning">
+            <span class="material-symbols-outlined">warning</span>
+            <span>Warning: ${course.grade} grade cannot be used as a prerequisite for other courses.</span>
         </div>` : '';
 
     // Check if the course is required
@@ -589,8 +615,14 @@ function createCourseCard(course) {
             <span class="badge">${course.credits} Credits</span>
         </div>
         ${course.prerequisite.length && !isSpecialCourse ? `
-            <div style="color: #6b7280; font-size: 0.875rem; margin-top: 0.5rem;">
+            <div class="prerequisite-info">
                 Prerequisites: ${course.prerequisite.join(', ')}
+            </div>
+        ` : ''}
+        ${prereqWarning ? `
+            <div class="prereq-warning">
+                <span class="material-symbols-outlined">error</span>
+                <span>${prereqWarning}</span>
             </div>
         ` : ''}
         ${dPlusWarning}
@@ -601,9 +633,12 @@ function createCourseCard(course) {
                 </button>
             ` : ''}
             ${course.completed && !isGreyedOut && !isSpecialCourse ? `
-                <input type="text" class="grade-input" placeholder="Letter Grade" 
-                    value="${course.grade || ''}" 
-                    onchange="updateGrade('${course.id}', this.value)">
+                <select class="grade-input" onchange="updateGrade('${course.id}', this.value)">
+                    <option value="">Grade</option>
+                    ${Object.keys(GRADE_POINTS).map(grade => `
+                        <option value="${grade}" ${course.grade === grade ? 'selected' : ''}>${grade}</option>
+                    `).join('')}
+                </select>
             ` : ''}
             ${!isRequired ? `
                 <button onclick="deleteCourse('${course.id}')">Delete</button>
@@ -611,14 +646,81 @@ function createCourseCard(course) {
         </div>
     `;
 
-    // Hover event listener to show the course's color and label
-    if (!isSpecialCourse) {
-        card.addEventListener('mousemove', (e) => showCourseColorLabel(e, statusClass));
-        card.addEventListener('mouseleave', () => hideCourseColorLabel());
-    }
-
     return card;
 }
+
+function addPrerequisiteWarningStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .prereq-warning {
+            background-color: #ffebee;
+            border-left: 4px solid #f44336;
+            padding: 8px;
+            margin: 8px 0;
+            border-radius: 4px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 0.875rem;
+            color: #d32f2f;
+        }
+        
+        .prereq-warning .material-symbols-outlined {
+            font-size: 1rem;
+            color: #d32f2f;
+        }
+        
+        .grade-warning {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 8px;
+            margin: 8px 0;
+            border-radius: 4px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 0.875rem;
+            color: #ff8f00;
+        }
+        
+        .grade-warning .material-symbols-outlined {
+            font-size: 1rem;
+            color: #ff8f00;
+        }
+        
+        .prerequisite-info {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        
+        .course-card.requirement-not-met {
+            opacity: 0.7;
+            background-color: #f5f5f5;
+            border: 1px dashed #ccc;
+        }
+        
+        .course-card.requirement-not-met .course-header h4,
+        .course-card.requirement-not-met .course-header p {
+            color: #9e9e9e;
+        }
+        
+        .grade-input {
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            background-color: white;
+            font-size: 11px;
+            width: 80px;
+            margin-top: 3px;
+            height: 30px;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+addPrerequisiteWarningStyles();
+
 
 function showCourseColorLabel(e, statusClass) {
     // Skip if the course is a special course (co-op or break)
@@ -691,7 +793,7 @@ function updateGrade(id, grade) {
     const course = courses.find(c => c.id === id);
     const major = document.getElementById('major-select').value;
 
-    // If changing from a non-D/D+ grade to a D/D+ grade
+    // If changing from a non-D/D+ grade to a D/D+ grade 
     if ((grade === 'D+' || grade === 'D') && 
         !(course.grade === 'D+' || course.grade === 'D') && 
         countDPlusGrades() >= maxDPlusAllowed) {
@@ -710,12 +812,23 @@ function updateGrade(id, grade) {
         );
     }
 
-    // Show a warning if the course has prerequisites and is a required course with a D/D+ grade
+    // Show warning if this is a required course with D/D+ grade and has prerequisites
     if (MAJOR_REQUIREMENTS[major].includes(id) && (grade === 'D+' || grade === 'D')) {
         const hasPrerequisites = course.prerequisite && course.prerequisite.length > 0;
         if (hasPrerequisites) {
-            alert(`Warning: ${course.id} (${course.name}) has prerequisites and is a required course. A grade of ${grade} cannot be used as a prerequisite.`);
+            alert(`Warning: ${course.id} (${course.name}) is a required course with prerequisites. A grade of ${grade} cannot be used to fulfill prerequisites for other courses.`);
         }
+    }
+
+    // Update all courses that have this course as a prerequisite
+    const dependentCourses = courses.filter(c => 
+        c.prerequisite.includes(id) && 
+        !['COOP', 'BREAK'].includes(c.id)
+    );
+    
+    if (dependentCourses.length > 0 && !PASSING_GRADES.includes(grade)) {
+        const dependentList = dependentCourses.map(c => c.id).join(', ');
+        alert(`Warning: ${course.id} is a prerequisite for: ${dependentList}. A grade of ${grade} is insufficient to fulfill these prerequisites.`);
     }
 
     // Update required courses if the grade-updated course is a required one
@@ -723,9 +836,9 @@ function updateGrade(id, grade) {
         renderRequiredCourses();
     }
 
-    // Update the D+ counter and re-render the courses
+    // Update the D+ counter and re-render all courses
     updateDPlusCounter();
-    renderCourses();
+    renderCourses(); // This will update all prerequisite warnings
 }
 
 function countDPlusGrades() {
