@@ -595,6 +595,14 @@ function createCourseCard(course) {
         e.dataTransfer.setData('text/plain', course.id);
     };
 
+    card.addEventListener('mousemove', (e) => {
+        showCourseColorLabel(e, statusClass);
+    });
+    
+    card.addEventListener('mouseleave', () => {
+        hideCourseColorLabel();
+    });
+
     // Show a warning if the course itself has D/D+ grade and has prerequisites
     const dPlusWarning = ['D+', 'D'].includes(course.grade) && course.prerequisite.length > 0 && !isSpecialCourse ?
         `<div class="grade-warning">
@@ -737,13 +745,14 @@ function showCourseColorLabel(e, statusClass) {
     }
 
     // Set the color and label based on the course's status
-const colorMap = {
-    'in-progress': { color: '#fef9c3', label: 'In Progress' }, // Yellow for in-progress
-    'completed': { color: '#dcfce7', label: 'Completed' },     // Green for completed
-    'failed': { color: '#fee2e2', label: 'Failed' },           // Red for failed
-    'requirement-not-met': { color: '#ffedd5', label: 'Requirement Not Met' }, // Grey for requirement not met
-    'special': { color: '#d3d3d3', label: 'Co-op/Break' }      // Grey for co-op and break courses
-};
+    const colorMap = {
+        'in-progress': { color: '#fef9c3', label: 'In Progress' }, // Yellow for in-progress
+        'completed': { color: '#dcfce7', label: 'Completed' },     // Green for completed
+        'failed': { color: '#fee2e2', label: 'Failed' },           // Red for failed
+        'requirement-not-met': { color: '#f5f5f5', label: 'Requirement Not Met' }, // Grey for requirement not met
+        'special': { color: '#d3d3d3', label: 'Co-op/Break' }      // Grey for co-op and break courses
+    };
+    
     const { color, label } = colorMap[statusClass] || colorMap['special'];
 
     // Update the color label content
@@ -768,6 +777,34 @@ function hideCourseColorLabel() {
         colorLabel.style.display = 'none';
     }
 }
+
+function addColorLabelStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .course-color-label {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-size: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+            pointer-events: none;
+        }
+        
+        .color-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            display: inline-block;
+            margin-right: 6px;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Call this when initializing the app
+addColorLabelStyles();
 
 function toggleCompletion(id) {
     const course = courses.find(c => c.id === id);

@@ -115,7 +115,7 @@ input, select {
 }
 
 .course-card.requirement-not-met {
-    background-color: #ffedd5; /* Orange for requirement not met */
+    background-color: #f5f5f5; /* Gray for requirement not met */
 }
 
 .course-card:hover {
