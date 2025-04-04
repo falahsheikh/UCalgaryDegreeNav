@@ -318,19 +318,19 @@ const MAJOR_REQUIREMENTS = {
 
 let courses = [];
 let requiredCourses = [];
-let maxDPlusAllowed = 2; // Default value
+let maxDPlusAllowed = 2; 
 let draggedCourseId = null;
 let gpaChart = null;
 let gpaLineChart = null;
 
 function initializeCoursesForMajor(major) {
-    // Clear existing courses
+    
     courses = [];
     
-    // Get all courses for the major
+    
     const majorCourses = AVAILABLE_COURSES[major] || [];
     
-    // Only include courses that have both defaultTerm and defaultYear
+    
     courses = majorCourses
         .filter(course => course.defaultTerm !== undefined && course.defaultYear !== undefined)
         .map(course => ({
@@ -344,18 +344,18 @@ function initializeCoursesForMajor(major) {
     
     requiredCourses = courses.filter(course => course.required);
     
-    // Update UI elements
+    
     updateYearFilterOptions();
 }
 
 function updateYearFilterOptions() {
     const yearFilter = document.getElementById('year-filter');
-    // Clear existing options except the "All Years" option
+    
     while (yearFilter.options.length > 1) {
         yearFilter.remove(1);
     }
     
-    // Options for years 1-4
+    
     for (let i = 1; i <= 4; i++) {
         const yearOption = document.createElement('option');
         yearOption.value = i;
@@ -363,7 +363,7 @@ function updateYearFilterOptions() {
         yearFilter.appendChild(yearOption);
     }
     
-    // Options for any years beyond 4 that exist in the courses
+    
     const existingYears = [...new Set(courses.map(course => course.year))];
     existingYears.filter(year => year > 4).forEach(year => {
         const yearOption = document.createElement('option');
@@ -394,7 +394,7 @@ function renderCourses() {
     const yearSections = document.getElementById('year-sections');
     yearSections.innerHTML = '';
 
-    // Create tooltip element if it doesn't exist
+    
     let tooltip = document.querySelector('.course-tooltip');
     if (!tooltip) {
         tooltip = document.createElement('div');
@@ -403,7 +403,7 @@ function renderCourses() {
     }
 
     if (selectedYear === 'all') {
-        // Find all years that exist in the data, or should exist by default
+        
         const defaultYears = [1, 2, 3, 4];
         const courseYears = [...new Set(courses.map(course => course.year))];
         const additionalYears = courseYears.filter(year => !defaultYears.includes(year) && year > 4).sort((a, b) => a - b);
@@ -438,7 +438,7 @@ function renderCourses() {
                     addButton.innerHTML = '<span class="material-symbols-outlined">add</span>';
                     addButton.onclick = () => addCourseToTerm(year, term);
                     
-                    // Add hover events for tooltip
+                    
                     addButton.addEventListener('mousemove', (e) => {
                         tooltip.textContent = 'Add courses to this term';
                         tooltip.style.display = 'block';
@@ -465,7 +465,7 @@ function renderCourses() {
             yearSections.appendChild(yearSection);
         });
     } else {
-        // Display courses for the selected year
+        
         const yearSection = document.createElement('div');
         yearSection.className = 'year-section';
         yearSection.innerHTML = `
@@ -492,7 +492,7 @@ function renderCourses() {
                 addButton.innerHTML = '<span class="material-symbols-outlined">add</span>';
                 addButton.onclick = () => addCourseToTerm(selectedYear, term);
                 
-                // Add hover events for tooltip
+                
                 addButton.addEventListener('mousemove', (e) => {
                     tooltip.textContent = 'Add courses to this term';
                     tooltip.style.display = 'block';
@@ -536,7 +536,7 @@ function createCourseCard(course) {
     let isSpecialCourse = ['COOP', 'BREAK'].includes(course.id);
     let prereqWarning = '';
 
-    // Check prerequisites for non-special courses
+    
     if (!isSpecialCourse && course.prerequisite.length > 0) {
         const unmetPrereqs = [];
         const invalidGradePrereqs = [];
@@ -558,12 +558,12 @@ function createCourseCard(course) {
             }
         });
 
-        // Determine if course should be greyed out
+        
         if (unmetPrereqs.length > 0 || invalidGradePrereqs.length > 0) {
             isGreyedOut = true;
             statusClass = 'requirement-not-met';
             
-            // Build prerequisite warning message
+            
             const warningParts = [];
             
             if (unmetPrereqs.length > 0) {
@@ -580,7 +580,7 @@ function createCourseCard(course) {
         }
     }
 
-    // Set status class for completed courses
+    
     if (course.completed && !isGreyedOut) {
         statusClass = PASSING_GRADES.includes(course.grade) ? 'completed' : 'failed';
     } else if (!isGreyedOut) {
@@ -603,14 +603,14 @@ function createCourseCard(course) {
         hideCourseColorLabel();
     });
 
-    // Show a warning if the course itself has D/D+ grade and has prerequisites
+    
     const dPlusWarning = ['D+', 'D'].includes(course.grade) && course.prerequisite.length > 0 && !isSpecialCourse ?
         `<div class="grade-warning">
             <span class="material-symbols-outlined">warning</span>
             <span>Warning: ${course.grade} grade cannot be used as a prerequisite for other courses.</span>
         </div>` : '';
 
-    // Check if the course is required
+    
     const major = document.getElementById('major-select').value;
     const isRequired = MAJOR_REQUIREMENTS[major].includes(course.id);
 
@@ -731,12 +731,12 @@ addPrerequisiteWarningStyles();
 
 
 function showCourseColorLabel(e, statusClass) {
-    // Skip if the course is a special course (co-op or break)
+    
     if (statusClass === 'special') {
         return;
     }
 
-    // Create the color label if it doesn't exist
+    
     let colorLabel = document.querySelector('.course-color-label');
     if (!colorLabel) {
         colorLabel = document.createElement('div');
@@ -744,25 +744,25 @@ function showCourseColorLabel(e, statusClass) {
         document.body.appendChild(colorLabel);
     }
 
-    // Set the color and label based on the course's status
+    
     const colorMap = {
-        'in-progress': { color: '#fef9c3', label: 'In Progress' }, // Yellow for in-progress
-        'completed': { color: '#dcfce7', label: 'Completed' },     // Green for completed
-        'failed': { color: '#fee2e2', label: 'Failed' },           // Red for failed
-        'requirement-not-met': { color: '#f5f5f5', label: 'Requirement Not Met' }, // Grey for requirement not met
-        'special': { color: '#d3d3d3', label: 'Co-op/Break' }      // Grey for co-op and break courses
+        'in-progress': { color: '#fef9c3', label: 'In Progress' }, 
+        'completed': { color: '#dcfce7', label: 'Completed' },     
+        'failed': { color: '#fee2e2', label: 'Failed' },           
+        'requirement-not-met': { color: '#f5f5f5', label: 'Requirement Not Met' }, 
+        'special': { color: '#d3d3d3', label: 'Co-op/Break' }      
     };
     
     const { color, label } = colorMap[statusClass] || colorMap['special'];
 
-    // Update the color label content
+    
     colorLabel.innerHTML = `
         <div class="color-box" style="background-color: ${color};"></div>
         <span>${label}</span>
     `;
 
-    // Position the color label next to the cursor
-    const offset = 10; // Distance from the cursor
+    
+    const offset = 10; 
     colorLabel.style.position = 'fixed';
     colorLabel.style.top = `${e.clientY + offset}px`;
     colorLabel.style.left = `${e.clientX + offset}px`;
@@ -803,7 +803,7 @@ function addColorLabelStyles() {
     document.head.appendChild(style);
 }
 
-// Call this when initializing the app
+
 addColorLabelStyles();
 
 function toggleCompletion(id) {
@@ -817,7 +817,7 @@ function toggleCompletion(id) {
         course.id === id ? { ...course, completed: !course.completed } : course
     );
 
-    // Update required courses if the toggled course is a required one
+    
     const major = document.getElementById('major-select').value;
     if (MAJOR_REQUIREMENTS[major].includes(id)) {
         renderRequiredCourses();
@@ -830,26 +830,26 @@ function updateGrade(id, grade) {
     const course = courses.find(c => c.id === id);
     const major = document.getElementById('major-select').value;
 
-    // If changing from a non-D/D+ grade to a D/D+ grade 
+    
     if ((grade === 'D+' || grade === 'D') && 
         !(course.grade === 'D+' || course.grade === 'D') && 
         countDPlusGrades() >= maxDPlusAllowed) {
         alert(`You have reached the maximum allowed D/D+ grades (${maxDPlusAllowed}). This course will not count towards your degree.`);
     }
 
-    // Update the course grade
+    
     courses = courses.map(course => 
         course.id === id ? { ...course, grade } : course
     );
 
-    // Automatically mark as completed if the grade is C- or above
+    
     if (PASSING_GRADES.includes(grade)) {
         courses = courses.map(course => 
             course.id === id ? { ...course, completed: true } : course
         );
     }
 
-    // Show warning if this is a required course with D/D+ grade and has prerequisites
+    
     if (MAJOR_REQUIREMENTS[major].includes(id) && (grade === 'D+' || grade === 'D')) {
         const hasPrerequisites = course.prerequisite && course.prerequisite.length > 0;
         if (hasPrerequisites) {
@@ -857,7 +857,7 @@ function updateGrade(id, grade) {
         }
     }
 
-    // Update all courses that have this course as a prerequisite
+    
     const dependentCourses = courses.filter(c => 
         c.prerequisite.includes(id) && 
         !['COOP', 'BREAK'].includes(c.id)
@@ -868,14 +868,14 @@ function updateGrade(id, grade) {
         alert(`Warning: ${course.id} is a prerequisite for: ${dependentList}. A grade of ${grade} is insufficient to fulfill these prerequisites.`);
     }
 
-    // Update required courses if the grade-updated course is a required one
+    
     if (MAJOR_REQUIREMENTS[major].includes(id)) {
         renderRequiredCourses();
     }
 
-    // Update the D+ counter and re-render all courses
+    
     updateDPlusCounter();
-    renderCourses(); // This will update all prerequisite warnings
+    renderCourses(); 
 }
 
 function countDPlusGrades() {
@@ -892,7 +892,7 @@ function updateCreditCounter() {
         course.completed && course.grade !== 'F' ? sum + course.credits : sum, 0);
     const creditCounter = document.getElementById('credit-counter');
     
-    // Set the text
+    
     creditCounter.textContent = `${total}/120 Credits`;
     
     creditCounter.style.cursor = 'pointer';
@@ -903,7 +903,7 @@ function updateCreditCounter() {
 
     creditCounter.style.marginLeft = '30%';
     
-    // Hover and active states
+    
     creditCounter.onmouseover = function() {
         this.style.backgroundColor = '#d8d4cc';
     };
@@ -914,12 +914,12 @@ function updateCreditCounter() {
     
     creditCounter.onmousedown = function() {
         this.style.borderColor = '#808080 #ffffff #ffffff #808080';
-        this.style.padding = '5px 11px 3px 13px'; // Shift content slightly
+        this.style.padding = '5px 11px 3px 13px'; 
     };
     
     creditCounter.onmouseup = function() {
         this.style.borderColor = '#ffffff #808080 #808080 #ffffff';
-        this.style.padding = '4px 12px 4px 12px'; // Reset padding
+        this.style.padding = '4px 12px 4px 12px'; 
     };
 }
 
@@ -937,18 +937,18 @@ function showCreditBreakdown() {
                        major === 'Mathematics' ? 'MATH' : 
                        major === 'Physics' ? 'PHYS' : '';
 
-    // Filter out COOP and BREAK courses (0 credits) and failed courses
+    
     courses.filter(course => 
         course.completed && 
         course.grade !== 'F' && 
-        course.credits > 0  // Exclude 0-credit courses like COOP/BREAK
+        course.credits > 0  
     ).forEach(course => {
         const levelMatch = course.id.match(/\d+/);
-        if (!levelMatch) return; // Skip if no number in course ID
+        if (!levelMatch) return; 
         
         const level = levelMatch[0].charAt(0) + '00';
         if (!breakdown[level]) {
-            breakdown[level] = { major: 0, other: 0 }; // Initialize if level doesn't exist
+            breakdown[level] = { major: 0, other: 0 }; 
         }
         
         if (course.id.startsWith(majorPrefix)) {
@@ -961,7 +961,7 @@ function showCreditBreakdown() {
     const breakdownBody = document.getElementById('credit-breakdown-body');
     breakdownBody.innerHTML = '';
     
-    // Sort levels numerically (100, 200, etc.)
+    
     const sortedLevels = Object.keys(breakdown).sort();
     
     sortedLevels.forEach(level => {
@@ -975,7 +975,7 @@ function showCreditBreakdown() {
         breakdownBody.appendChild(row);
     });
 
-    // Update the major credits header
+    
     document.getElementById('major-credits-header').textContent = `${major} Credits`;
 
     const modal = document.getElementById('credit-breakdown-modal');
@@ -1069,7 +1069,7 @@ function canAddCourse(year, term) {
 }
 
 function showNotification(message) {
-    // Create notification element
+    
     const notification = document.createElement('div');
     notification.className = 'notification';
     notification.textContent = message;
@@ -1085,15 +1085,15 @@ function showNotification(message) {
     notification.style.opacity = '0';
     notification.style.transition = 'opacity 0.3s ease-in-out';
     
-    // Add to document
+    
     document.body.appendChild(notification);
     
-    // Fade in
+    
     setTimeout(() => {
         notification.style.opacity = '1';
     }, 10);
     
-    // Remove after 3 seconds
+    
     setTimeout(() => {
         notification.style.opacity = '0';
         setTimeout(() => {
@@ -1104,29 +1104,29 @@ function showNotification(message) {
 
 function addYear() {
     const years = [...new Set(courses.map(course => course.year))];
-    const maxYear = years.length > 0 ? Math.max(...years) : 4; // Default to 4 if no courses
+    const maxYear = years.length > 0 ? Math.max(...years) : 4; 
     const newYear = maxYear + 1;
     
-    // Make sure we can't add years less than 5
+    
     if (newYear < 5) {
         alert("Years 1-4 are already available by default.");
         return;
     }
 
-    // Check if the previous year has at least one course
+    
     const previousYearCourses = courses.filter(course => course.year === maxYear);
     if (previousYearCourses.length === 0) {
         alert(`Cannot add Year ${newYear} because Year ${maxYear} is empty. Please add at least one course to Year ${maxYear} first.`);
         return;
     }
 
-    // Prompt the user for confirmation
+    
     const confirmAdd = confirm(`Are you sure you want to add Year ${newYear}?`);
     if (!confirmAdd) {
         return;
     }
 
-    // Check for available courses
+    
     const major = document.getElementById('major-select').value;
     const availableCourses = AVAILABLE_COURSES[major].filter(course => 
         !courses.some(c => c.id === course.id)
@@ -1137,23 +1137,23 @@ function addYear() {
         return;
     }
 
-    // Update year-filter dropdown to include the new year
+    
     const yearFilter = document.getElementById('year-filter');
     const newYearOption = document.createElement('option');
     newYearOption.value = newYear;
     newYearOption.textContent = `Year ${newYear}`;
     yearFilter.appendChild(newYearOption);
     
-    // Set the filter to "All Years" to show all years including the new one
+    
     yearFilter.value = 'all';
     
-    // Render the courses to show the new year
+    
     renderCourses();
     
-    // Show notification
+    
     showNotification(`Year ${newYear} has been added successfully!`);
     
-    // Automatically scroll to the new year section
+    
     setTimeout(() => {
         const newYearSection = document.querySelector(`.year-section h3:contains('Year ${newYear}')`);
         if (newYearSection) {
@@ -1166,13 +1166,13 @@ function deleteYear() {
     const years = [...new Set(courses.map(course => course.year))];
     const maxYear = years.length > 0 ? Math.max(...years) : 4;
     
-    // Don't allow deleting years 1-4
+    
     if (maxYear <= 4) {
         alert("Cannot delete Years 1-4 as they are required by default.");
         return;
     }
     
-    // Check if the year has courses
+    
     const yearCourses = courses.filter(course => course.year === maxYear);
     if (yearCourses.length > 0) {
         const confirmDelete = confirm(`Year ${maxYear} contains ${yearCourses.length} course(s). Deleting this year will remove all courses in it. Are you sure you want to proceed?`);
@@ -1180,7 +1180,7 @@ function deleteYear() {
             return;
         }
         
-        // Remove the courses from this year
+        
         courses = courses.filter(course => course.year !== maxYear);
     } else {
         const confirmDelete = confirm(`Are you sure you want to delete Year ${maxYear}?`);
@@ -1195,24 +1195,24 @@ function deleteYear() {
         yearFilter.removeChild(yearOption);
     }
     
-    // Update the UI
+    
     updateRequiredCourses();
     renderCourses();
     
-    // Show notification
+    
     showNotification(`Year ${maxYear} has been deleted successfully!`);
 }
 
 function addCourseToTerm(year, term) {
     const major = document.getElementById('major-select').value;
 
-    // Get all courses from AVAILABLE_COURSES that aren't already in the courses array
+    
     const availableCourses = AVAILABLE_COURSES[major].filter(course => {
-        // Allow multiple instances of co-op and break courses
+        
         if (['COOP', 'BREAK'].includes(course.id)) {
             return true;
         }
-        // Exclude courses that are already in the courses array
+        
         return !courses.some(c => c.id === course.id);
     });
 
@@ -1221,25 +1221,25 @@ function addCourseToTerm(year, term) {
         return;
     }
 
-    // Check if the term container already has a course selection dropdown
+    
     const termContainer = document.querySelector(`.term-container[data-year="${year}"][data-term="${term}"]`);
     const existingDropdown = termContainer.querySelector('.course-selection-container');
 
     if (existingDropdown) {
-        // If a dropdown already exists, remove it
+        
         termContainer.removeChild(existingDropdown);
         return;
     }
 
-    // Create a container for the dropdown and button
+    
     const selectionContainer = document.createElement('div');
     selectionContainer.className = 'course-selection-container';
 
-    // Add this to your term container styling:
-    termContainer.style.overflow = 'visible'; // Allow dropdown to overflow if needed
-    termContainer.style.position = 'relative'; // Create positioning context
+    
+    termContainer.style.overflow = 'visible'; 
+    termContainer.style.position = 'relative'; 
 
-    // Add search input
+    
     const searchInput = document.createElement('input');
     searchInput.type = 'text';
     searchInput.placeholder = 'Search courses...';
@@ -1250,12 +1250,12 @@ function addCourseToTerm(year, term) {
     
     const dropdown = document.createElement('select');
     dropdown.className = 'course-dropdown';
-    dropdown.size = 8; // Show more items by default
+    dropdown.size = 8; 
     dropdown.multiple = false;
 
-    // Function to populate dropdown based on search term
+    
     function populateDropdown(searchTerm = '') {
-        dropdown.innerHTML = ''; // Clear existing options
+        dropdown.innerHTML = ''; 
         
         const filteredCourses = availableCourses.filter(course => {
             const searchLower = searchTerm.toLowerCase();
@@ -1273,16 +1273,16 @@ function addCourseToTerm(year, term) {
                 const option = document.createElement('option');
                 option.value = course.id;
                 option.textContent = `${course.id} - ${course.name}`;
-                option.title = `${course.id} - ${course.name}`; // Add tooltip
+                option.title = `${course.id} - ${course.name}`; 
                 dropdown.appendChild(option);
             });
         }
     }
 
-    // Initial population
+    
     populateDropdown();
 
-    // Search functionality
+    
     searchInput.addEventListener('input', (e) => {
         populateDropdown(e.target.value);
     });
@@ -1320,7 +1320,7 @@ function addCourseToTerm(year, term) {
             required: isRequired
         });
 
-        // Remove the selection container after adding the course
+        
         termContainer.removeChild(selectionContainer);
 
         updateRequiredCourses();
@@ -1331,19 +1331,19 @@ function addCourseToTerm(year, term) {
     cancelButton.textContent = 'Cancel';
     cancelButton.className = 'cancel-button';
     cancelButton.onclick = () => {
-        // Remove the selection container when canceled
+        
         termContainer.removeChild(selectionContainer);
     };
 
-    // Add new "Don't See Course?" button
+    
     const customCourseButton = document.createElement('button');
     customCourseButton.textContent = 'Custom';
     customCourseButton.className = 'custom-course-button';
     customCourseButton.onclick = () => {
-        // Remove the current selection container
+        
         termContainer.removeChild(selectionContainer);
         
-        // Show the custom course form
+        
         showCustomCourseForm(year, term);
     };
 
@@ -1352,24 +1352,24 @@ function addCourseToTerm(year, term) {
     selectionContainer.appendChild(dropdownContainer);
     buttonContainer.appendChild(confirmButton);
     buttonContainer.appendChild(cancelButton);
-    buttonContainer.appendChild(customCourseButton); // Add the new button
+    buttonContainer.appendChild(customCourseButton); 
 
     selectionContainer.appendChild(buttonContainer);
 
     termContainer.appendChild(selectionContainer);
 
-    // Focus the search input when the dropdown appears
+    
     searchInput.focus();
 }
 
 function showCustomCourseForm(year, term) {
     const termContainer = document.querySelector(`.term-container[data-year="${year}"][data-term="${term}"]`);
     
-    // Create form container
+    
     const formContainer = document.createElement('div');
     formContainer.className = 'custom-course-form';
     
-    // Form HTML
+    
     formContainer.innerHTML = `
         <h4>Create Custom Course</h4>
         <div class="form-group">
@@ -1402,7 +1402,7 @@ function showCustomCourseForm(year, term) {
         </div>
     `;
     
-    // Add event listeners
+    
     formContainer.querySelector('.save-custom-course').addEventListener('click', () => {
         saveCustomCourse(year, term, formContainer);
     });
@@ -1411,7 +1411,7 @@ function showCustomCourseForm(year, term) {
         termContainer.removeChild(formContainer);
     });
     
-    // Add to term container
+    
     termContainer.appendChild(formContainer);
 }
 
@@ -1421,7 +1421,7 @@ function saveCustomCourse(year, term, formContainer) {
     const creditsInput = formContainer.querySelector('#custom-course-credits');
     const prereqsInput = formContainer.querySelector('#custom-course-prerequisites');
     
-    // Validate inputs
+    
     if (!idInput.value.trim()) {
         alert("Please enter a course ID");
         return;
@@ -1432,12 +1432,12 @@ function saveCustomCourse(year, term, formContainer) {
         return;
     }
     
-    // Format prerequisites
+    
     const prerequisites = prereqsInput.value.trim() 
         ? prereqsInput.value.split(',').map(p => p.trim()).filter(p => p)
         : [];
     
-    // Check if prerequisites exist in the system
+    
     const major = document.getElementById('major-select').value;
     const allCourses = AVAILABLE_COURSES[major];
     const invalidPrereqs = prerequisites.filter(p => !allCourses.some(c => c.id === p));
@@ -1449,7 +1449,7 @@ function saveCustomCourse(year, term, formContainer) {
         }
     }
     
-    // Create the custom course
+    
     const customCourse = {
         id: idInput.value.trim().toUpperCase(),
         name: nameInput.value.trim(),
@@ -1460,25 +1460,25 @@ function saveCustomCourse(year, term, formContainer) {
         completed: ['COOP', 'BREAK'].includes(idInput.value.trim().toUpperCase()),
         grade: null,
         required: false,
-        isCustom: true // Mark as custom course
+        isCustom: true 
     };
     
-    // Add to courses array
+    
     courses.push(customCourse);
     
-    // Remove the form
+    
     const termContainer = formContainer.parentNode;
     termContainer.removeChild(formContainer);
     
-    // Update UI
+    
     updateRequiredCourses();
     renderCourses();
     
-    // Show success message
+    
     showNotification(`Custom course ${customCourse.id} added successfully!`);
 }
 
-// Add CSS for the custom course form
+
 function addCustomCourseStyles() {
     const style = document.createElement('style');
     style.textContent = `
@@ -1565,17 +1565,17 @@ function addCustomCourseStyles() {
     document.head.appendChild(style);
 }
 
-// Call this function when initializing the app
+
 addCustomCourseStyles();
 
 function deleteCourse(id) {
-    // Remove the course with the specified id
+    
     courses = courses.filter(course => course.id !== id);
 
-    // Update the required courses list
+    
     updateRequiredCourses();
 
-    // Force a UI refresh
+    
     renderCourses();
 }
 
@@ -1592,10 +1592,10 @@ function setDPlusLimit() {
     }
     maxDPlusAllowed = limit;
 
-    // Update the D/D+ counter
+    
     updateDPlusCounter();
 
-    // Update course cards with D/D+ grades
+    
     const courseCards = document.querySelectorAll('.course-card');
     courseCards.forEach(card => {
         const courseId = card.dataset.id;
@@ -1608,12 +1608,12 @@ function setDPlusLimit() {
         }
     });
 
-    // Show a confirmation message
+    
     showNotification(`D/D+ limit updated to ${limit}.`);
 }
 
 function generateSharableLink() {
-    // Prepare all data to be saved
+    
     const data = {
         courses: courses.map(course => ({
             id: course.id,
@@ -1627,18 +1627,19 @@ function generateSharableLink() {
             required: course.required
         })),
         maxDPlusAllowed: maxDPlusAllowed,
-        major: document.getElementById('major-select').value
+        major: document.getElementById('major-select').value,
+        bgColor: document.getElementById('bg-color-picker').value
     };
 
-    // Encode to base64
+    
     const encodedData = btoa(JSON.stringify(data));
     const link = `${window.location.origin}${window.location.pathname}?data=${encodedData}`;
 
-    // Save state
+    
     window.linkGenerated = true;
     window.lastSavedState = JSON.stringify(data);
 
-    // Copy to clipboard and show notification
+    
     navigator.clipboard.writeText(link).then(() => {
         showNotification("Sharable link copied to clipboard!");
     }).catch(() => {
@@ -1647,13 +1648,13 @@ function generateSharableLink() {
 }
 
 function initializeCoursesForMajor(major) {
-    // Clear existing courses
+    
     courses = [];
     
-    // Get all courses for the major
+    
     const majorCourses = AVAILABLE_COURSES[major] || [];
     
-    // Only include courses that have both defaultTerm and defaultYear
+    
     courses = majorCourses
         .filter(course => course.defaultTerm !== undefined && course.defaultYear !== undefined)
         .map(course => ({
@@ -1667,7 +1668,7 @@ function initializeCoursesForMajor(major) {
     
     requiredCourses = courses.filter(course => course.required);
     
-    // Update UI elements
+    
     updateYearFilterOptions();
 }
 
@@ -1680,16 +1681,21 @@ function loadFromSharableLink() {
     }
 
     try {
-        // Decode the data
+        
         const decodedData = JSON.parse(atob(encodedData));
         
-        // Validate the data structure
+        
         if (!decodedData || typeof decodedData !== 'object' || !Array.isArray(decodedData.courses)) {
             console.error("Invalid data structure in sharable link");
             return false;
         }
 
-        // Set the major
+        if (decodedData.bgColor) {
+            document.body.style.backgroundColor = decodedData.bgColor;
+            document.getElementById('bg-color-picker').value = decodedData.bgColor;
+        }
+
+        
         const majorSelect = document.getElementById('major-select');
         const availableMajors = Object.keys(AVAILABLE_COURSES);
         const major = availableMajors.includes(decodedData.major) 
@@ -1697,12 +1703,12 @@ function loadFromSharableLink() {
             : availableMajors[0];
         majorSelect.value = major;
 
-        // Process courses
+        
         const loadedCourses = [];
         const majorCourses = AVAILABLE_COURSES[major] || [];
 
         decodedData.courses.forEach(savedCourse => {
-            // Find the course in available courses to get full details
+            
             const courseTemplate = majorCourses.find(c => c.id === savedCourse.id) || {
                 id: savedCourse.id,
                 name: savedCourse.name || `Course ${savedCourse.id}`,
@@ -1724,7 +1730,7 @@ function loadFromSharableLink() {
             });
         });
 
-        // Only update if we have valid courses
+        
         if (loadedCourses.length > 0) {
             courses = loadedCourses;
             maxDPlusAllowed = typeof decodedData.maxDPlusAllowed === 'number'
@@ -1733,12 +1739,12 @@ function loadFromSharableLink() {
             
             document.getElementById('d-plus-limit').value = maxDPlusAllowed;
             
-            // Update the UI
+            
             updateRequiredCourses();
             renderCourses();
             updateAllGraphs();
 
-            // Update saved state tracking
+            
             window.linkGenerated = true;
             window.lastSavedState = JSON.stringify({
                 courses: courses,
@@ -1762,18 +1768,18 @@ function resetPlan() {
         maxDPlusAllowed = 2;
         document.getElementById('d-plus-limit').value = maxDPlusAllowed;
         
-        // Reset the URL without the data parameter
+        
         if (window.history.replaceState) {
             const newUrl = window.location.pathname;
             window.history.replaceState({}, document.title, newUrl);
         }
         
-        // Update UI
+        
         updateRequiredCourses();
         renderCourses();
         updateAllGraphs();
         
-        // Reset saved state tracking
+        
         window.linkGenerated = false;
         window.lastSavedState = null;
     }
@@ -1782,15 +1788,15 @@ function resetPlan() {
 function initializeDefaultCourses() {
     const major = document.getElementById('major-select').value;
     
-    // Reset to empty array first
+    
     courses = [];
     
-    // Get all courses for the major that have default term/year
+    
     const defaultCourses = AVAILABLE_COURSES[major].filter(
         course => course.defaultTerm && course.defaultYear
     );
 
-    // Create the course objects with all required properties
+    
     courses = defaultCourses.map(course => ({
         id: course.id,
         name: course.name,
@@ -1803,11 +1809,11 @@ function initializeDefaultCourses() {
         required: MAJOR_REQUIREMENTS[major].includes(course.id)
     }));
 
-    // Reset D+ limit
+    
     maxDPlusAllowed = 2;
     document.getElementById('d-plus-limit').value = maxDPlusAllowed;
 
-    // Update UI
+    
     updateRequiredCourses();
     renderCourses();
     updateAllGraphs();
@@ -1815,17 +1821,17 @@ function initializeDefaultCourses() {
     console.log("Initialized default course plan for", major);
 }
 
-// Ensure the loadFromSharableLink function is called AFTER the DOM is fully loaded
+
 window.addEventListener('DOMContentLoaded', () => {
     loadFromSharableLink();
 });
 
 function hasUnsavedChanges() {
     if (!window.linkGenerated) {
-        return courses.length > 0; // If we have courses but never generated a link
+        return courses.length > 0; 
     }
 
-    // Get current state to compare with last saved state
+    
     const currentData = {
         courses: courses,
         maxDPlusAllowed: maxDPlusAllowed,
@@ -1833,14 +1839,14 @@ function hasUnsavedChanges() {
         major: document.getElementById('major-select')?.value || 'Computer Science',
     };
 
-    // Compare as JSON strings to detect any differences
+    
     return window.lastSavedState !== JSON.stringify(currentData);
 }
 
 function trackChanges() {
-    // This function is called whenever there's a change to the course data
     
-    // We need to check if we've ever generated a link first
+    
+    
     if (window.linkGenerated) {
         const currentData = {
             courses: courses,
@@ -1849,10 +1855,10 @@ function trackChanges() {
             major: document.getElementById('major-select')?.value || 'Computer Science',
         };
         
-        // Check if there are unsaved changes
+        
         const hasChanges = window.lastSavedState !== JSON.stringify(currentData);
         
-        // Update UI to show unsaved changes indicator
+        
         const saveReminder = document.getElementById('save-reminder');
         if (saveReminder) {
             if (hasChanges) {
@@ -1864,12 +1870,12 @@ function trackChanges() {
     }
 }
 
-// This function should be called after any course-related operation
+
 function updateAppState() {
     renderCourses();
     renderRequiredCourses();
     updateAllGraphs();
-    trackChanges(); // Check for unsaved changes
+    trackChanges(); 
 }
 
 function allowDrop(e) {
@@ -1883,29 +1889,29 @@ function handleDrop(e) {
     courses = courses.map(course => 
         course.id === draggedCourseId ? { ...course, term, year: parseInt(year) } : course
     );
-    updateAppState(); // Use the new combined function
+    updateAppState(); 
     draggedCourseId = null;
 }
 
-// Window event listener for beforeunload
+
 window.addEventListener('beforeunload', function(e) {
-    // The message actually shown depends on the browser and some browsers 
-    // don't allow customizing the message at all for security reasons
+    
+    
     const confirmationMessage = 'You have unsaved changes. Please remember to generate and save a sharable link before leaving.';
     e.returnValue = confirmationMessage;
     return confirmationMessage;
 });
 
 function updateMajor() {
-    // If there are courses, show confirmation dialog
+    
     if (courses.length > 0) {
         const confirmed = confirm("Changing your major will reset your course plan. Have you saved your current progress with a sharable link?");
         if (!confirmed) {
-            // Reset the dropdown to the previous value
+            
             const major = document.getElementById('major-select');
             const currentMajorCourses = courses.length > 0 ? courses[0].id.substring(0, 4) : 'CPSC';
             
-            // Match the prefix to a major
+            
             let previousMajor;
             if (currentMajorCourses === 'CPSC') {
                 previousMajor = 'Computer Science';
@@ -1914,7 +1920,7 @@ function updateMajor() {
             } else if (currentMajorCourses === 'PHYS') {
                 previousMajor = 'Physics';
             } else {
-                previousMajor = 'Computer Science'; // Default
+                previousMajor = 'Computer Science'; 
             }
             
             major.value = previousMajor;
@@ -1922,15 +1928,15 @@ function updateMajor() {
         }
     }
     
-    // Proceed with updating the major
+    
     const major = document.getElementById('major-select').value;
     initializeCoursesForMajor(major);
     requiredCourses = courses.filter(course => MAJOR_REQUIREMENTS[major].includes(course.id));
-    updateAppState(); // Use the new combined function
+    updateAppState(); 
 }
 
 function hasGeneratedLink() {
-    // A simple flag that gets set when a link is generated
+    
     return window.linkGenerated === true;
 }
 
@@ -1944,7 +1950,7 @@ function renderRequiredCourses() {
     requiredCourseIds.forEach(courseId => {
         const course = courses.find(c => c.id === courseId);
         
-        // If the course exists in the courses array
+        
         if (course) {
             const courseDiv = document.createElement('div');
             courseDiv.className = `required-course${course.completed ? ' completed' : ''}${course.grade && !PASSING_GRADES.includes(course.grade) ? ' failed' : ''}`;
@@ -1954,7 +1960,7 @@ function renderRequiredCourses() {
             `;
             requiredCoursesList.appendChild(courseDiv);
         } else {
-            // If the course is required but not added yet
+            
             const availableCourse = AVAILABLE_COURSES[major].find(c => c.id === courseId);
             if (availableCourse) {
                 const courseDiv = document.createElement('div');
@@ -1970,24 +1976,26 @@ function renderRequiredCourses() {
 }
 
 function initialize() {
-    // Set default values
+    
     window.linkGenerated = false;
     window.lastSavedState = null;
     
-    // Initialize courses for the default major (Computer Science)
-    initializeCoursesForMajor('Computer Science');
     
-    // Try to load from sharable link if available
+    initializeCoursesForMajor('Computer Science');
+    loadBackgroundColor();
+    setupKeyboardShortcuts();
+    
+    
     const loadedFromLink = loadFromSharableLink();
     
-    // If not loaded from link, render default courses
+    
     if (!loadedFromLink) {
         renderCourses();
         renderRequiredCourses();
         updateAllGraphs();
     }
     
-    // Set up event listeners
+    
     setupEventListeners();
 }
 
@@ -2014,22 +2022,22 @@ function updateAllGraphs() {
 function updateRequirementProgressChart() {
     const ctx = document.getElementById('requirementProgressChart').getContext('2d');
     
-    // Get the major
+    
     const major = document.getElementById('major-select').value;
     const requiredCourseIds = MAJOR_REQUIREMENTS[major];
     
-    // Count completed required courses
+    
     const completedRequired = courses.filter(course => 
         requiredCourseIds.includes(course.id) && 
         course.completed && 
         PASSING_GRADES.includes(course.grade)
     ).length;
     
-    // Calculate percentage
+    
     const totalRequired = requiredCourseIds.length;
     const percentComplete = Math.round((completedRequired / totalRequired) * 100);
     
-    // Create or update the chart
+    
     if (window.requirementChart) {
         window.requirementChart.destroy();
     }
@@ -2066,7 +2074,7 @@ function updateRequirementProgressChart() {
         }
     });
     
-    // Add center text with percentage
+    
     const centerText = {
         id: 'centerText',
         afterDraw: function(chart) {
@@ -2084,7 +2092,7 @@ function updateRequirementProgressChart() {
         }
     };
     
-    // Add plugin if not already added
+    
     if (!window.requirementChart.options.plugins.centerText) {
         window.requirementChart.options.plugins.centerText = true;
         window.requirementChart.register(centerText);
@@ -2094,7 +2102,7 @@ function updateRequirementProgressChart() {
 function updateCourseDistributionChart() {
     const ctx = document.getElementById('courseDistributionChart').getContext('2d');
     
-    // Calculate course distribution by year and term
+    
     const distribution = {
         'Year 1': { Fall: 0, Winter: 0, Spring: 0, Summer: 0 },
         'Year 2': { Fall: 0, Winter: 0, Spring: 0, Summer: 0 },
@@ -2102,7 +2110,7 @@ function updateCourseDistributionChart() {
         'Year 4': { Fall: 0, Winter: 0, Spring: 0, Summer: 0 }
     };
     
-    // Add extra years if they exist
+    
     const years = [...new Set(courses.map(course => course.year))];
     years.forEach(year => {
         if (year > 4) {
@@ -2110,7 +2118,7 @@ function updateCourseDistributionChart() {
         }
     });
     
-    // Count courses by year and term
+    
     courses.forEach(course => {
         const yearKey = `Year ${course.year}`;
         if (distribution[yearKey]) {
@@ -2118,7 +2126,7 @@ function updateCourseDistributionChart() {
         }
     });
     
-    // Calculate credit load for each term
+    
     const creditLoad = {};
     Object.keys(distribution).forEach(year => {
         creditLoad[year] = {};
@@ -2130,7 +2138,7 @@ function updateCourseDistributionChart() {
         });
     });
     
-    // Create datasets for the chart
+    
     const labels = Object.keys(distribution);
     const datasets = ['Fall', 'Winter', 'Spring', 'Summer'].map((term, index) => {
         const colors = ['#2196F3', '#4CAF50', '#FFC107', '#F44336'];
@@ -2141,7 +2149,7 @@ function updateCourseDistributionChart() {
         };
     });
     
-    // Create or update the chart
+    
     if (window.distributionChart) {
         window.distributionChart.destroy();
     }
@@ -2193,7 +2201,7 @@ function updateCourseDistributionChart() {
 function updatePrerequisiteFlowChart() {
     const ctx = document.getElementById('prerequisiteFlowChart').getContext('2d');
     
-    // Analyze prerequisites for completed courses
+    
     const prerequisiteCompletion = {};
     const completedCourses = courses.filter(course => course.completed);
     
@@ -2210,7 +2218,7 @@ function updatePrerequisiteFlowChart() {
         };
     });
     
-    // Calculate prerequisite completion rate
+    
     const prereqStats = completedCourses.map(course => {
         if (course.prerequisite.length === 0) return null;
         
@@ -2228,11 +2236,11 @@ function updatePrerequisiteFlowChart() {
         };
     }).filter(stat => stat !== null);
     
-    // Find courses with most complex prerequisite chains
+    
     const coursesByPrereqCount = [...prereqStats].sort((a, b) => b.totalPrereqs - a.totalPrereqs);
     const topCourses = coursesByPrereqCount.slice(0, 5);
     
-    // Create or update the chart
+    
     if (window.prereqChart) {
         window.prereqChart.destroy();
     }
@@ -2279,7 +2287,7 @@ function updatePrerequisiteFlowChart() {
         }
     });
     
-    // Show details about highest complexity prerequisite chains
+    
     const detailsDiv = document.getElementById('prereqFlowDetails');
     detailsDiv.innerHTML = `
         <h4>Courses with Complex Prerequisites</h4>
@@ -2299,8 +2307,337 @@ function updatePrerequisiteFlowChart() {
     `;
 }
 
+function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-// Event listeners
+window.addEventListener('scroll', function() {
+    const backToTopButton = document.getElementById('back-to-top');
+    if (window.pageYOffset > 300) {
+        backToTopButton.style.display = 'flex';
+        backToTopButton.style.alignItems = 'center';
+        backToTopButton.style.justifyContent = 'center';
+    } else {
+        backToTopButton.style.display = 'none';
+    }
+});
+
+function setBackgroundColor(color) {
+    document.body.style.backgroundColor = color;
+    
+    localStorage.setItem('degreeNavigatorBgColor', color);
+}
+
+
+function loadBackgroundColor() {
+    const savedColor = localStorage.getItem('degreeNavigatorBgColor');
+    if (savedColor) {
+        document.body.style.backgroundColor = savedColor;
+        document.getElementById('bg-color-picker').value = savedColor;
+    }
+}
+
+
+function setupKeyboardShortcuts() {
+    
+    const SHORTCUTS = {
+        search: 'f',          
+        yearFilter: 'h',      
+        termFilter: 'j',      
+        statusFilter: 'k'     
+    };
+
+    const activeStates = {
+        yearFilter: false,
+        termFilter: false,
+        statusFilter: false
+    };
+
+    
+    let currentActiveClone = null;
+    let currentSelectedIndex = -1;
+
+    document.addEventListener('keydown', function(e) {
+        
+        if (currentActiveClone) {
+            const options = currentActiveClone.options;
+            const optionsLength = options.length;
+            
+            switch (e.key) {
+                case 'ArrowUp':
+                    e.preventDefault();
+                    currentSelectedIndex = Math.max(0, currentSelectedIndex - 1);
+                    updateSelectedOption(currentActiveClone, currentSelectedIndex);
+                    ensureOptionVisible(currentActiveClone, currentSelectedIndex);
+                    return;
+                    
+                case 'ArrowDown':
+                    e.preventDefault();
+                    currentSelectedIndex = Math.min(optionsLength - 1, currentSelectedIndex + 1);
+                    updateSelectedOption(currentActiveClone, currentSelectedIndex);
+                    ensureOptionVisible(currentActiveClone, currentSelectedIndex);
+                    return;
+                    
+                case 'Enter':
+                    e.preventDefault();
+                    if (currentSelectedIndex >= 0) {
+                        selectAndApplyOption(currentActiveClone);
+                    }
+                    return;
+                    
+                case 'Escape':
+                    e.preventDefault();
+                    closeAllFilters(activeStates);
+                    return;
+            }
+        }
+
+        
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || 
+            e.target.tagName === 'TEXTAREA' || e.ctrlKey || e.metaKey || e.altKey) {
+            return;
+        }
+
+        switch(e.key.toLowerCase()) {
+            case SHORTCUTS.search:
+                e.preventDefault();
+                document.getElementById('search').focus();
+                break;
+                
+            case SHORTCUTS.yearFilter:
+                e.preventDefault();
+                toggleFilter('year-filter', activeStates);
+                break;
+                
+            case SHORTCUTS.termFilter:
+                e.preventDefault();
+                toggleFilter('term-filter', activeStates);
+                break;
+                
+            case SHORTCUTS.statusFilter:
+                e.preventDefault();
+                toggleFilter('status-filter', activeStates);
+                break;
+                
+            case 'escape':
+                closeAllFilters(activeStates);
+                break;
+        }
+    });
+
+    function updateSelectedOption(selectElement, index) {
+        for (let i = 0; i < selectElement.options.length; i++) {
+            selectElement.options[i].selected = (i === index);
+        }
+    }
+
+    function ensureOptionVisible(selectElement, index) {
+        const option = selectElement.options[index];
+        const selectTop = selectElement.scrollTop;
+        const selectBottom = selectTop + selectElement.clientHeight;
+        const optionTop = option.offsetTop;
+        const optionBottom = optionTop + option.offsetHeight;
+
+        if (optionTop < selectTop) {
+            selectElement.scrollTop = optionTop;
+        } else if (optionBottom > selectBottom) {
+            selectElement.scrollTop = optionBottom - selectElement.clientHeight;
+        }
+    }
+
+    function selectAndApplyOption(cloneElement) {
+        const filterId = cloneElement.id.replace('-expanded', '');
+        const filter = document.getElementById(filterId);
+        
+        if (filter) {
+            filter.value = cloneElement.value;
+            
+            
+            const changeEvent = new Event('change', { bubbles: true });
+            filter.dispatchEvent(changeEvent);
+            
+            const filterKey = filterId.replace('-filter', 'Filter');
+            closeFilter(filter);
+            
+            if (activeStates[filterKey]) {
+                activeStates[filterKey] = false;
+            }
+            
+            currentActiveClone = null;
+            currentSelectedIndex = -1;
+        }
+    }
+
+    function toggleFilter(filterId, stateObj) {
+        const filter = document.getElementById(filterId);
+        if (!filter) return;
+        
+        const filterKey = filterId.replace('-filter', 'Filter');
+        
+        if (stateObj[filterKey]) {
+            
+            closeFilter(filter);
+            stateObj[filterKey] = false;
+            currentActiveClone = null;
+            currentSelectedIndex = -1;
+        } else {
+            
+            closeAllFilters(stateObj);
+            
+            
+            openFilter(filter);
+            stateObj[filterKey] = true;
+        }
+    }
+    
+    function openFilter(filter) {
+        
+        const clone = filter.cloneNode(true);
+        clone.id = filter.id + '-expanded';
+        clone.classList.add('expanded-select');
+        clone.size = Math.min(filter.options.length, 10); 
+        
+        
+        const rect = filter.getBoundingClientRect();
+        clone.style.position = 'fixed';
+        clone.style.top = `${rect.bottom + window.scrollY}px`;
+        clone.style.left = `${rect.left + window.scrollX}px`;
+        clone.style.width = `${rect.width}px`;
+        clone.style.zIndex = '1000';
+        
+        
+        document.body.appendChild(clone);
+        
+        
+        currentSelectedIndex = filter.selectedIndex;
+        
+        
+        currentActiveClone = clone;
+        
+        
+        clone.addEventListener('change', function() {
+            selectAndApplyOption(this);
+        });
+        
+        
+        clone.addEventListener('mouseover', function(e) {
+            if (e.target.tagName === 'OPTION') {
+                for (let i = 0; i < this.options.length; i++) {
+                    if (this.options[i] === e.target) {
+                        currentSelectedIndex = i;
+                        updateSelectedOption(this, currentSelectedIndex);
+                        break;
+                    }
+                }
+            }
+        });
+        
+        
+        clone.addEventListener('click', function(e) {
+            if (e.target.tagName === 'OPTION') {
+                for (let i = 0; i < this.options.length; i++) {
+                    if (this.options[i] === e.target) {
+                        currentSelectedIndex = i;
+                        selectAndApplyOption(this);
+                        break;
+                    }
+                }
+            }
+        });
+        
+        
+        const clickOutsideHandler = function(e) {
+            if (clone && !clone.contains(e.target) && e.target !== filter) {
+                const filterKey = filter.id.replace('-filter', 'Filter');
+                closeFilter(filter);
+                if (activeStates[filterKey]) {
+                    activeStates[filterKey] = false;
+                }
+                document.removeEventListener('click', clickOutsideHandler);
+                currentActiveClone = null;
+                currentSelectedIndex = -1;
+            }
+        };
+        
+        
+        setTimeout(() => {
+            document.addEventListener('click', clickOutsideHandler);
+        }, 100);
+        
+        
+        filter.dataset.expandedClone = clone.id;
+        
+        
+        clone.focus();
+        updateSelectedOption(clone, currentSelectedIndex);
+        ensureOptionVisible(clone, currentSelectedIndex);
+    }
+    
+    function closeFilter(filter) {
+        if (!filter) return;
+        
+        const cloneId = filter.dataset.expandedClone;
+        if (cloneId) {
+            const clone = document.getElementById(cloneId);
+            if (clone) {
+                if (currentActiveClone === clone) {
+                    currentActiveClone = null;
+                    currentSelectedIndex = -1;
+                }
+                clone.remove();
+                delete filter.dataset.expandedClone;
+            }
+        }
+    }
+    
+    function closeAllFilters(stateObj) {
+        Object.keys(stateObj).forEach(key => {
+            if (stateObj[key]) {
+                const filterId = key.replace('Filter', '-filter');
+                const filter = document.getElementById(filterId);
+                if (filter) {
+                    closeFilter(filter);
+                    stateObj[key] = false;
+                }
+            }
+        });
+        currentActiveClone = null;
+        currentSelectedIndex = -1;
+    }
+
+    updateShortcutTooltips(SHORTCUTS);
+}
+
+function updateShortcutTooltips(shortcuts) {
+    const tooltips = {
+        'search': `Press ${shortcuts.search.toUpperCase()} to focus`,
+        'year-filter': `Press ${shortcuts.yearFilter.toUpperCase()} to toggle`,
+        'term-filter': `Press ${shortcuts.termFilter.toUpperCase()} to toggle`,
+        'status-filter': `Press ${shortcuts.statusFilter.toUpperCase()} to toggle`
+    };
+
+    Object.entries(tooltips).forEach(([id, text]) => {
+        const element = document.getElementById(id);
+        if (element) {
+            let container = element.closest('.has-shortcut');
+            if (!container) {
+                container = element.parentElement;
+                container.classList.add('has-shortcut');
+            }
+            
+            let tooltip = container.querySelector('.shortcut-hint');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.className = 'shortcut-hint';
+                container.appendChild(tooltip);
+            }
+            tooltip.textContent = text;
+        }
+    });
+}
+
+
+
 document.getElementById('search').addEventListener('input', renderCourses);
 document.getElementById('year-filter').addEventListener('change', renderCourses);
 document.getElementById('term-filter').addEventListener('change', renderCourses);
@@ -2308,6 +2645,6 @@ document.getElementById('status-filter').addEventListener('change', renderCourse
 document.addEventListener('DOMContentLoaded', initialize);
 
 
-// Initialize courses for the default major (Computer Science)
+
 initializeCoursesForMajor('Computer Science');
 renderCourses();

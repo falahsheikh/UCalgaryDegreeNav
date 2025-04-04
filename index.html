@@ -10,6 +10,11 @@
     <script src="script.js" defer></script>
 </head>
 <body>
+    <div class="color-picker-container">
+        <label for="bg-color-picker">Background Color:</label>
+        <input type="color" id="bg-color-picker" value="#ffffff" onchange="setBackgroundColor(this.value)">
+    </div>
+
     <div class="card">
         <div class="card-header">
             <div class="card-title">
@@ -19,6 +24,7 @@
                 <span class="badge" id="d-plus-counter">0/<span id="max-d-plus">2</span> D Grades</span>
             </div>
         </div>
+        
         <div class="card-content" style="padding: 1.5rem;">
             <!-- Major Selection -->
             <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;"">
@@ -31,29 +37,41 @@
             </div>
 
             <div class="filters">
-                <div class="search-container">
-                    <span class="material-symbols-outlined search-icon">search</span>
+                <div class="search-container has-shortcut">
                     <input type="text" id="search" placeholder="Search added courses...">
+                    <div class="shortcut-hint">Press F to focus</div>
                 </div>
-                <select id="year-filter">
-                    <option value="all">All Years</option>
-                    <option value="1">Year 1</option>
-                    <option value="2">Year 2</option>
-                    <option value="3">Year 3</option>
-                    <option value="4">Year 4</option>
-                </select>
-                <select id="term-filter">
-                    <option value="all">All Terms</option>
-                    <option>Fall</option>
-                    <option>Winter</option>
-                    <option>Spring</option>
-                    <option>Summer</option>
-                </select>
-                <select id="status-filter">
-                    <option value="all">All Courses</option>
-                    <option value="completed">Completed</option>
-                    <option value="incomplete">Incomplete</option>
-                </select>
+                
+                <div class="filter-group has-shortcut">
+                    <select id="year-filter">
+                        <option value="all">All Years</option>
+                        <option value="1">Year 1</option>
+                        <option value="2">Year 2</option>
+                        <option value="3">Year 3</option>
+                        <option value="4">Year 4</option>
+                    </select>
+                    <div class="shortcut-hint">Press H to toggle</div>
+                </div>
+                
+                <div class="filter-group has-shortcut">
+                    <select id="term-filter">
+                        <option value="all">All Terms</option>
+                        <option>Fall</option>
+                        <option>Winter</option>
+                        <option>Spring</option>
+                        <option>Summer</option>
+                    </select>
+                    <div class="shortcut-hint">Press J to toggle</div>
+                </div>
+                
+                <div class="filter-group has-shortcut">
+                    <select id="status-filter">
+                        <option value="all">All Courses</option>
+                        <option value="completed">Completed</option>
+                        <option value="incomplete">Incomplete</option>
+                    </select>
+                    <div class="shortcut-hint">Press K to toggle</div>
+                </div>
             </div>
 
             <!-- Year Sections -->
@@ -131,5 +149,9 @@
                        
         </div>
     </div>
+
+    <button id="back-to-top" title="Back to top" onclick="scrollToTop()">
+        <span class="material-symbols-outlined">arrow_upward</span>
+    </button>
 </body>
 </html>
