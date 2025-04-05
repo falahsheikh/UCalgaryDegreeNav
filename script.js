@@ -2363,12 +2363,11 @@ function loadBackgroundColor() {
 
 
 function setupKeyboardShortcuts() {
-    
     const SHORTCUTS = {
-        search: 'f',          
-        yearFilter: 'h',      
-        termFilter: 'j',      
-        statusFilter: 'k'     
+        search: 'f',
+        yearFilter: 'h',
+        termFilter: 'j',
+        statusFilter: 'k'
     };
 
     const activeStates = {
@@ -2377,12 +2376,10 @@ function setupKeyboardShortcuts() {
         statusFilter: false
     };
 
-    
     let currentActiveClone = null;
     let currentSelectedIndex = -1;
 
     document.addEventListener('keydown', function(e) {
-        
         if (currentActiveClone) {
             const options = currentActiveClone.options;
             const optionsLength = options.length;
@@ -2416,7 +2413,6 @@ function setupKeyboardShortcuts() {
             }
         }
 
-        
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || 
             e.target.tagName === 'TEXTAREA' || e.ctrlKey || e.metaKey || e.altKey) {
             return;
@@ -2499,15 +2495,17 @@ function setupKeyboardShortcuts() {
         const filterKey = filterId.replace('-filter', 'Filter');
         const isCurrentlyActive = stateObj[filterKey];
         
-        
+        // Close all other filters first
         closeAllFilters(stateObj);
         
-        
-        if (!isCurrentlyActive) {
+        // Toggle the current filter
+        if (isCurrentlyActive) {
+            closeFilter(filter);
+            stateObj[filterKey] = false;
+        } else {
             openFilter(filter);
             stateObj[filterKey] = true;
         }
-        
     }
 
     document.querySelectorAll('.filter-group select').forEach(select => {
@@ -2534,15 +2532,10 @@ function setupKeyboardShortcuts() {
     });
     
     function openFilter(filter) {
-        
-        closeAllFilters(activeStates);
-        
-        
         const clone = filter.cloneNode(true);
         clone.id = filter.id + '-expanded';
         clone.classList.add('expanded-select');
         clone.size = Math.min(filter.options.length, 10);
-        
         
         const rect = filter.getBoundingClientRect();
         clone.style.position = 'fixed';
@@ -2555,15 +2548,12 @@ function setupKeyboardShortcuts() {
         
         document.body.appendChild(clone);
         
-        
         currentSelectedIndex = filter.selectedIndex;
         currentActiveClone = clone;
-        
         
         clone.focus();
         updateSelectedOption(clone, currentSelectedIndex);
         ensureOptionVisible(clone, currentSelectedIndex);
-        
         
         clone.addEventListener('change', function() {
             selectAndApplyOption(this);
@@ -2571,13 +2561,16 @@ function setupKeyboardShortcuts() {
         
         clone.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
+                const filterId = this.id.replace('-expanded', '');
+                const filter = document.getElementById(filterId);
                 closeFilter(filter);
             }
         });
         
-        
         const clickOutsideHandler = function(e) {
             if (!clone.contains(e.target) && e.target !== filter) {
+                const filterId = clone.id.replace('-expanded', '');
+                const filter = document.getElementById(filterId);
                 closeFilter(filter);
                 document.removeEventListener('click', clickOutsideHandler);
             }
@@ -2586,7 +2579,6 @@ function setupKeyboardShortcuts() {
         setTimeout(() => {
             document.addEventListener('click', clickOutsideHandler);
         }, 10);
-        
         
         filter.dataset.expandedClone = clone.id;
     }
@@ -2605,6 +2597,12 @@ function setupKeyboardShortcuts() {
                 clone.remove();
                 delete filter.dataset.expandedClone;
             }
+        }
+        
+        // Update the active state for this filter
+        const filterKey = filter.id.replace('-filter', 'Filter');
+        if (activeStates[filterKey]) {
+            activeStates[filterKey] = false;
         }
     }
     
