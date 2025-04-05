@@ -2326,10 +2326,10 @@ function setBackgroundColor(color) {
     document.body.style.backgroundColor = color;
     localStorage.setItem('degreeNavigatorBgColor', color);
     
-    // Update back-to-top button to be inverse color
+    
     const backToTopButton = document.getElementById('back-to-top');
     if (backToTopButton) {
-        // Calculate contrasting color
+        
         const rgb = hexToRgb(color);
         const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
         const textColor = brightness > 128 ? '#000000' : '#ffffff';
@@ -2339,12 +2339,12 @@ function setBackgroundColor(color) {
     }
 }
 
-// Helper function to convert hex to RGB
+
 function hexToRgb(hex) {
-    // Remove # if present
+    
     hex = hex.replace('#', '');
     
-    // Parse r, g, b values
+    
     const r = parseInt(hex.substring(0, 2), 16);
     const g = parseInt(hex.substring(2, 4), 16);
     const b = parseInt(hex.substring(4, 6), 16);
@@ -2499,30 +2499,30 @@ function setupKeyboardShortcuts() {
         const filterKey = filterId.replace('-filter', 'Filter');
         const isCurrentlyActive = stateObj[filterKey];
         
-        // Close all filters first
+        
         closeAllFilters(stateObj);
         
-        // Toggle the current filter
+        
         if (!isCurrentlyActive) {
             openFilter(filter);
             stateObj[filterKey] = true;
         }
-        // No else needed since we already closed it
+        
     }
 
     document.querySelectorAll('.filter-group select').forEach(select => {
-        // Replace mousedown handler with this:
+        
         select.addEventListener('mousedown', function(e) {
             e.preventDefault();
             const filterId = this.id;
             const filterKey = filterId.replace('-filter', 'Filter');
             
-            // Close if already open
+            
             if (activeStates[filterKey]) {
                 closeFilter(this);
                 activeStates[filterKey] = false;
             } 
-            // Open if closed
+            
             else {
                 closeAllFilters(activeStates);
                 openFilter(this);
@@ -2530,20 +2530,20 @@ function setupKeyboardShortcuts() {
             }
         });
 
-        // Remove any existing click handlers
+        
     });
     
     function openFilter(filter) {
-        // Close any existing dropdown first
+        
         closeAllFilters(activeStates);
         
-        // Create clone
+        
         const clone = filter.cloneNode(true);
         clone.id = filter.id + '-expanded';
         clone.classList.add('expanded-select');
         clone.size = Math.min(filter.options.length, 10);
         
-        // Position it
+        
         const rect = filter.getBoundingClientRect();
         clone.style.position = 'fixed';
         clone.style.top = `${rect.bottom + window.scrollY}px`;
@@ -2555,16 +2555,16 @@ function setupKeyboardShortcuts() {
         
         document.body.appendChild(clone);
         
-        // Set initial selection
+        
         currentSelectedIndex = filter.selectedIndex;
         currentActiveClone = clone;
         
-        // Focus and scroll to selection
+        
         clone.focus();
         updateSelectedOption(clone, currentSelectedIndex);
         ensureOptionVisible(clone, currentSelectedIndex);
         
-        // Event handlers
+        
         clone.addEventListener('change', function() {
             selectAndApplyOption(this);
         });
@@ -2575,7 +2575,7 @@ function setupKeyboardShortcuts() {
             }
         });
         
-        // Click outside handler
+        
         const clickOutsideHandler = function(e) {
             if (!clone.contains(e.target) && e.target !== filter) {
                 closeFilter(filter);
@@ -2587,7 +2587,7 @@ function setupKeyboardShortcuts() {
             document.addEventListener('click', clickOutsideHandler);
         }, 10);
         
-        // Store reference
+        
         filter.dataset.expandedClone = clone.id;
     }
     
@@ -2649,7 +2649,7 @@ function updateShortcutTooltips(shortcuts) {
             }
             tooltip.textContent = text;
 
-            // Add mouse events for consistent behavior
+            
             container.addEventListener('mouseenter', () => {
                 tooltip.style.display = 'block';
                 setTimeout(() => tooltip.style.opacity = '1', 10);
