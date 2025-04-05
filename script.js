@@ -2324,8 +2324,32 @@ window.addEventListener('scroll', function() {
 
 function setBackgroundColor(color) {
     document.body.style.backgroundColor = color;
-    
     localStorage.setItem('degreeNavigatorBgColor', color);
+    
+    // Update back-to-top button to be inverse color
+    const backToTopButton = document.getElementById('back-to-top');
+    if (backToTopButton) {
+        // Calculate contrasting color
+        const rgb = hexToRgb(color);
+        const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+        const textColor = brightness > 128 ? '#000000' : '#ffffff';
+        
+        backToTopButton.style.backgroundColor = textColor === '#000000' ? '#ffffff' : '#000000';
+        backToTopButton.style.color = textColor;
+    }
+}
+
+// Helper function to convert hex to RGB
+function hexToRgb(hex) {
+    // Remove # if present
+    hex = hex.replace('#', '');
+    
+    // Parse r, g, b values
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    
+    return { r, g, b };
 }
 
 
@@ -2473,104 +2497,98 @@ function setupKeyboardShortcuts() {
         if (!filter) return;
         
         const filterKey = filterId.replace('-filter', 'Filter');
+        const isCurrentlyActive = stateObj[filterKey];
         
-        if (stateObj[filterKey]) {
-            
-            closeFilter(filter);
-            stateObj[filterKey] = false;
-            currentActiveClone = null;
-            currentSelectedIndex = -1;
-        } else {
-            
-            closeAllFilters(stateObj);
-            
-            
+        // Close all filters first
+        closeAllFilters(stateObj);
+        
+        // Toggle the current filter
+        if (!isCurrentlyActive) {
             openFilter(filter);
             stateObj[filterKey] = true;
         }
+        // No else needed since we already closed it
     }
+
+    document.querySelectorAll('.filter-group select').forEach(select => {
+        // Replace mousedown handler with this:
+        select.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            const filterId = this.id;
+            const filterKey = filterId.replace('-filter', 'Filter');
+            
+            // Close if already open
+            if (activeStates[filterKey]) {
+                closeFilter(this);
+                activeStates[filterKey] = false;
+            } 
+            // Open if closed
+            else {
+                closeAllFilters(activeStates);
+                openFilter(this);
+                activeStates[filterKey] = true;
+            }
+        });
+
+        // Remove any existing click handlers
+    });
     
     function openFilter(filter) {
+        // Close any existing dropdown first
+        closeAllFilters(activeStates);
         
+        // Create clone
         const clone = filter.cloneNode(true);
         clone.id = filter.id + '-expanded';
         clone.classList.add('expanded-select');
-        clone.size = Math.min(filter.options.length, 10); 
+        clone.size = Math.min(filter.options.length, 10);
         
-        
+        // Position it
         const rect = filter.getBoundingClientRect();
         clone.style.position = 'fixed';
         clone.style.top = `${rect.bottom + window.scrollY}px`;
         clone.style.left = `${rect.left + window.scrollX}px`;
         clone.style.width = `${rect.width}px`;
         clone.style.zIndex = '1000';
-        
+        clone.style.border = '1px solid #C8102E';
+        clone.style.borderRadius = '4px';
         
         document.body.appendChild(clone);
         
-        
+        // Set initial selection
         currentSelectedIndex = filter.selectedIndex;
-        
-        
         currentActiveClone = clone;
         
+        // Focus and scroll to selection
+        clone.focus();
+        updateSelectedOption(clone, currentSelectedIndex);
+        ensureOptionVisible(clone, currentSelectedIndex);
         
+        // Event handlers
         clone.addEventListener('change', function() {
             selectAndApplyOption(this);
         });
         
-        
-        clone.addEventListener('mouseover', function(e) {
-            if (e.target.tagName === 'OPTION') {
-                for (let i = 0; i < this.options.length; i++) {
-                    if (this.options[i] === e.target) {
-                        currentSelectedIndex = i;
-                        updateSelectedOption(this, currentSelectedIndex);
-                        break;
-                    }
-                }
-            }
-        });
-        
-        
-        clone.addEventListener('click', function(e) {
-            if (e.target.tagName === 'OPTION') {
-                for (let i = 0; i < this.options.length; i++) {
-                    if (this.options[i] === e.target) {
-                        currentSelectedIndex = i;
-                        selectAndApplyOption(this);
-                        break;
-                    }
-                }
-            }
-        });
-        
-        
-        const clickOutsideHandler = function(e) {
-            if (clone && !clone.contains(e.target) && e.target !== filter) {
-                const filterKey = filter.id.replace('-filter', 'Filter');
+        clone.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
                 closeFilter(filter);
-                if (activeStates[filterKey]) {
-                    activeStates[filterKey] = false;
-                }
+            }
+        });
+        
+        // Click outside handler
+        const clickOutsideHandler = function(e) {
+            if (!clone.contains(e.target) && e.target !== filter) {
+                closeFilter(filter);
                 document.removeEventListener('click', clickOutsideHandler);
-                currentActiveClone = null;
-                currentSelectedIndex = -1;
             }
         };
         
-        
         setTimeout(() => {
             document.addEventListener('click', clickOutsideHandler);
-        }, 100);
+        }, 10);
         
-        
+        // Store reference
         filter.dataset.expandedClone = clone.id;
-        
-        
-        clone.focus();
-        updateSelectedOption(clone, currentSelectedIndex);
-        ensureOptionVisible(clone, currentSelectedIndex);
     }
     
     function closeFilter(filter) {
@@ -2592,13 +2610,11 @@ function setupKeyboardShortcuts() {
     
     function closeAllFilters(stateObj) {
         Object.keys(stateObj).forEach(key => {
-            if (stateObj[key]) {
-                const filterId = key.replace('Filter', '-filter');
-                const filter = document.getElementById(filterId);
-                if (filter) {
-                    closeFilter(filter);
-                    stateObj[key] = false;
-                }
+            const filterId = key.replace('Filter', '-filter');
+            const filter = document.getElementById(filterId);
+            if (filter) {
+                closeFilter(filter);
+                stateObj[key] = false;
             }
         });
         currentActiveClone = null;
@@ -2632,6 +2648,17 @@ function updateShortcutTooltips(shortcuts) {
                 container.appendChild(tooltip);
             }
             tooltip.textContent = text;
+
+            // Add mouse events for consistent behavior
+            container.addEventListener('mouseenter', () => {
+                tooltip.style.display = 'block';
+                setTimeout(() => tooltip.style.opacity = '1', 10);
+            });
+            
+            container.addEventListener('mouseleave', () => {
+                tooltip.style.opacity = '0';
+                setTimeout(() => tooltip.style.display = 'none', 200);
+            });
         }
     });
 }
