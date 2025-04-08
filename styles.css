@@ -572,11 +572,11 @@ canvas {
 
 
 .color-picker-container {
-    position: fixed;
-    top: 660px;
-    right: 1340px;
+    position: relative; 
+    top: auto;
+    right: auto;
     background: white;
-    padding: 10px;
+    padding: 3px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     z-index: 100;
@@ -584,10 +584,15 @@ canvas {
     flex-direction: column;
     align-items: center;
     gap: 5px;
-}
+    height: 39px;
+    width: 40px;
+  }
 
-.color-picker-tooltip {
+  .color-picker-tooltip {
     position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
     background-color: #333;
     color: white;
     padding: 5px 10px;
@@ -597,12 +602,17 @@ canvas {
     pointer-events: none;
     display: none;
     white-space: nowrap;
-    bottom: -30px;
-    left: 50%;
-    transform: translateX(-50%);
     opacity: 0;
     transition: opacity 0.2s;
-}
+  }
+
+  .controls-container {
+    margin-top: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: flex-start; 
+  }
 
 .color-picker-container:hover .color-picker-tooltip {
     display: block;
@@ -617,8 +627,8 @@ canvas {
 }
 
 .color-picker-container input[type="color"] {
-    width: 40px;
-    height: 40px;
+    width: 25px;
+    height: 35px;
     border: 2px solid #ddd;
     border-radius: 50%;
     cursor: pointer;

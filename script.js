@@ -1569,14 +1569,22 @@ function addCustomCourseStyles() {
 addCustomCourseStyles();
 
 function deleteCourse(id) {
+    const course = courses.find(c => c.id === id);
+    if (!course) return;
+
+    const isConfirmed = confirm(`Are you sure you want to delete ${course.id} - ${course.name}?\n\nThis action cannot be undone.`);
     
+    if (!isConfirmed) {
+        return; 
+    }
+
     courses = courses.filter(course => course.id !== id);
 
-    
     updateRequiredCourses();
 
-    
     renderCourses();
+
+    showNotification(`Course ${course.id} has been deleted.`);
 }
 
 function updateRequiredCourses() {

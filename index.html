@@ -10,11 +10,6 @@
     <script src="script.js" defer></script>
 </head>
 <body>
-    <div class="color-picker-container">
-        <div class="color-picker-tooltip">Background color</div>
-        <label for="bg-color-picker"></label>
-        <input type="color" id="bg-color-picker" value="#ffffff" onchange="setBackgroundColor(this.value)">
-    </div>
 
     <div class="card">
         <div class="card-header">
@@ -137,14 +132,19 @@
             </div>
 
             <!-- Generate Sharable Link & Set D/D+ Limit  -->
-            <div style="margin-top: 2rem; display: flex; align-items: center; justify-content: space-between;">
-                <button onclick="generateSharableLink()" style="height: 38px; margin-bottom: 3px;">Generate Sharable Link</button>
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <div class="controls-container">
+                <div class="color-picker-container">
+                    <div class="color-picker-tooltip">Background color</div>
+                    <label for="bg-color-picker"></label>
+                    <input type="color" id="bg-color-picker" value="#ffffff" onchange="setBackgroundColor(this.value)">
+                </div>
+                <button onclick="generateSharableLink()" style="height: 38px;">Generate Sharable Link</button>
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-left: auto;">
                     <label for="d-plus-limit">Set Maximum D/D+ Grades Allowed:</label>
                     <input type="number" id="d-plus-limit" min="0" value="2" 
-                        style="width: 4rem; padding: 0.5rem; font-size: 1rem; 
-                        border: 1px solid #ccc; border-radius: 4px; text-align: center;">
-                    <button onclick="setDPlusLimit()"  style="height: 38px; margin-bottom: 3px;">Set Limit</button>
+                           style="width: 4rem; padding: 0.5rem; font-size: 1rem; 
+                           border: 1px solid #ccc; border-radius: 4px; text-align: center;">
+                    <button onclick="setDPlusLimit()" style="height: 38px; margin-bottom: 3px;">Set Limit</button>
                 </div>
             </div>
                        
