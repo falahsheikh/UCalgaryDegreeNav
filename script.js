@@ -2373,9 +2373,9 @@ function loadBackgroundColor() {
 function setupKeyboardShortcuts() {
     const SHORTCUTS = {
         search: 'f',
-        yearFilter: 'h',
-        termFilter: 'j',
-        statusFilter: 'k'
+        yearFilter: 'y',
+        termFilter: 't',
+        statusFilter: 'c'
     };
 
     const activeStates = {
