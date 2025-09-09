@@ -1,4 +1,4 @@
-# University of Calgary Degree Navigator
+# CPSC481 University of Calgary Degree Navigator
 
 ## Project Team
 - **Sheikh Falah Sheikh Hasan** (UCID: 30175335, sheikhfalah.sheikhha@ucalgary.ca)
